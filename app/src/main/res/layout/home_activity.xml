@@ -1,0 +1,41 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1"
+    >
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar" />
+
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="386dp"
+        android:id="@+id/listView"
+        android:layout_centerHorizontal="true"
+        android:layout_weight="7"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/toolbar" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:id="@+id/emptyView"
+        android:layout_alignTop="@+id/listView">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="No Notifications"
+            android:id="@+id/textView2" />
+
+    </LinearLayout>
+
+</RelativeLayout>
