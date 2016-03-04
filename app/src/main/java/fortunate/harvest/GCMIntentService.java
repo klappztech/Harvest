@@ -10,6 +10,7 @@ package fortunate.harvest;
         import android.content.Context;
         import android.content.Intent;
         import android.support.v4.app.NotificationCompat;
+        import android.support.v4.content.LocalBroadcastManager;
         import android.util.Log;
         import android.widget.Toast;
 
@@ -146,21 +147,20 @@ public class GCMIntentService extends GCMBaseIntentService {
 // mId allows you to update the notification later on.
         mNotificationManager.notify(mId, mBuilder.build());
 
-//        Intent notificationIntent = new Intent(context, MainActivity.class);
-//        // set intent so it does not start a new activity
-//        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-//                Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//        PendingIntent intent =
-//                PendingIntent.getActivity(context, 0, notificationIntent, 0);
-//       // notification.setLatestEventInfo(context, title, message, intent);
-//        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-//
-//        // Play default notification sound
-//        notification.defaults |= Notification.DEFAULT_SOUND;
-//
-//        // Vibrate if vibrate is enabled
-//        notification.defaults |= Notification.DEFAULT_VIBRATE;
-//        notificationManager.notify(0, notification);
+        // update the list view in the home activity
+        sendBroadcastMessage( context );
+
+
+    }
+
+    private static void sendBroadcastMessage(Context context) {
+
+        //send broadcast
+        Intent intent = new Intent("ACTION_BROADCAST");
+
+        intent.putExtra("ACTION", "reload");
+        Log.e("mahc", "Broadcast: reload");
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
     }
 

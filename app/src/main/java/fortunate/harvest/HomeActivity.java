@@ -2,8 +2,11 @@ package fortunate.harvest;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -50,6 +53,27 @@ public class HomeActivity extends AppCompatActivity {
         openDB();
 
         populateListViewFromDB();
+
+        //******************** Broadcast reciever *********************
+        broadcastURLReceiver =  new BroadcastReceiver() {
+            //@SuppressLint("NewApi")
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                String action = intent.getStringExtra("ACTION");
+
+                openDB();
+
+
+                if(action == "reload") {
+                    Log.e("mahc", "Broadcast_received: reload");
+                    populateListViewFromDB();
+                }
+
+            }
+        };
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastURLReceiver, new IntentFilter("ACTION_BROADCAST"));
 
 
 
@@ -269,10 +293,11 @@ public class HomeActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_search) {
+            long newId = myDb.insertRow("Result", "Its working", 10000);
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
