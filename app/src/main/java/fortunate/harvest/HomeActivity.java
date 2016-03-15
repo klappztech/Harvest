@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -51,6 +52,8 @@ public class HomeActivity extends AppCompatActivity {
 
         //database
         openDB();
+        // for list view click action
+        registerListClickCallback();
 
         populateListViewFromDB();
 
@@ -78,6 +81,50 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
+    }
+
+    private void registerListClickCallback() {
+        ListView myList = (ListView) findViewById(R.id.listView);
+        myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View viewClicked,
+                                    int position, long idInDB) {
+                // Toast.makeText(getApplicationContext(), "Clicked on Item:"+idInDB, Toast.LENGTH_SHORT).show();
+                ActionOnClick(idInDB);
+            }
+        });
+    }
+
+    private void ActionOnClick(long idInDB) {
+        View v=null;
+        Cursor cursor = myDb.getRow(idInDB);
+        if (cursor.moveToFirst()) {
+            long idDB = cursor.getLong(DBAdapter.COL_ROWID);
+            String url = cursor.getString(DBAdapter.COL_URL);
+
+
+            Intent web_intent = new Intent(getApplicationContext(), WebActivity.class);
+            web_intent.putExtra("url",url);
+
+            startActivity(web_intent);
+
+        }
+        cursor.close();
+
+    }
+
+    private void sendBroadcastMessage(String url) {
+
+        Intent intent = new Intent("OPEN_WEB_PAGE");
+        intent.putExtra("url", url);
+        //intent.putExtra("mode", url);
+        //intent.putExtra("close", url);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        Log.e("mahc", "==========sent broadcast"+url);
+
+        // close this activity
+        this.finish();
     }
 
     @Override
