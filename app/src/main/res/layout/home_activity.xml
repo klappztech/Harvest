@@ -10,15 +10,19 @@
         android:id="@+id/toolbar"
         layout="@layout/toolbar" />
 
-
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="386dp"
-        android:id="@+id/listView"
-        android:layout_centerHorizontal="true"
-        android:layout_weight="7"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@+id/toolbar" />
+    <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="386dp"
+            android:id="@+id/listView"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="7"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/toolbar" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <LinearLayout
         android:orientation="vertical"

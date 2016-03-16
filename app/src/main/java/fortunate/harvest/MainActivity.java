@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,11 +18,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.google.android.gcm.GCMRegistrar;
 
-public class MainActivity extends AppCompatActivity {
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity  {
     // label to display gcm messages
     TextView lblMessage;
+
 
     // Asyntask
     AsyncTask<Void, Void, Void> mRegisterTask;
@@ -178,5 +190,7 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onDestroy();
     }
+
+
 
 }
