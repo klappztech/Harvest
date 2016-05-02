@@ -46,13 +46,13 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private String TAG = "mahc";
 
-    private String URL_TOP_250 = "http://api.androidhive.info/json/imdb_top_250.php?offset=";
+    private String URL_NOTI = "http://www.harvestentrancecoaching.com/app/get_notifications.php";
 
     private SwipeRefreshLayout swipeRefreshLayout;
     // initially offset will be 0, later will be updated while parsing the json
     private int offSet = 0;
     private SwipeListAdapter adapter;
-    private List<Movie> movieList;
+    private List<Message> messageList;
     private ListView listView;
 
     List<Long> selected_list_items = new ArrayList<Long>();
@@ -79,10 +79,99 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         listView = (ListView) findViewById(R.id.listView);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
 
-        movieList = new ArrayList<>();
-        adapter = new SwipeListAdapter(this, movieList);
+        messageList = new ArrayList<>();
+        adapter = new SwipeListAdapter(this, messageList);
         listView.setAdapter(adapter);
 
+        // list view touch actions
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        listView.setItemsCanFocus(false);
+        listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+            @Override
+            public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
+                if (b) {
+                    selected_count++;
+                    actionMode.setTitle(selected_count + " items selected");
+                    selected_list_items.add(l);
+                } else {
+                    selected_count--;
+                    actionMode.setTitle(selected_count + " items selected");
+                    selected_list_items.remove(l);
+                }
+
+            }
+
+            @Override
+            public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+                MenuInflater inflater = getMenuInflater();
+                inflater.inflate(R.menu.menu_otps, menu);
+                selected_count = 0;
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+
+                switch (menuItem.getItemId()) {
+                    case R.id.delete_id:
+                        if (selected_list_items.isEmpty()) {
+                            Toast.makeText(getApplicationContext(), "Select items to delete!", Toast.LENGTH_LONG);
+                        }
+                        for (long id : selected_list_items) {
+                            Cursor cursor = myDb.getRow(id);
+                            if (cursor.moveToFirst()) {
+                                long idDB = cursor.getLong(DBAdapter.COL_ROWID);
+                                // String name = cursor.getString(DBAdapter.COL_TITLE);
+                                String url = cursor.getString(DBAdapter.COL_URL);
+                                //String favColour = cursor.getString(DBAdapter.COL_FAVCOLOUR);
+
+                                myDb.deleteRow(idDB);
+                            }
+                            cursor.close();
+
+                        }
+                        int msg_count  = populateMessageListFromInternalDB();
+
+                        if(msg_count > 0) {
+                            // display list view
+                            adapter.notifyDataSetChanged();
+
+                        } else {
+                            // goto next step, ie: get data from online
+                        }
+
+                        Toast.makeText(getApplicationContext(), selected_count + "items deleted", Toast.LENGTH_SHORT);
+
+                        actionMode.finish();
+                        return true;
+//                        break;
+                    case R.id.clear_id:
+                        selected_count = 0;
+                        selected_list_items.clear();
+                        for (int i = 0; i < listView.getAdapter().getCount(); i++) {
+                            listView.setItemChecked(i, true);
+                        }
+
+                        break;
+
+                    default:
+                        return false;
+                }
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode actionMode) {
+                selected_count = 0;
+                selected_list_items.clear();
+            }
+        });
+    // touch action ends
         swipeRefreshLayout.setOnRefreshListener(this);
 
         /**
@@ -93,8 +182,20 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                                     @Override
                                     public void run() {
                                         swipeRefreshLayout.setRefreshing(true);
+                                        Log.e(TAG, "on create");
+                                        // check whether internaL database s empty
+                                        int msg_count  = populateMessageListFromInternalDB();
 
-                                        fetchMovies();
+                                        if(msg_count > 0) {
+                                            // display list view
+                                            adapter.notifyDataSetChanged();
+
+                                        } else {
+                                            // goto next step, ie: get data from online
+                                        }
+
+
+                                        fetchMessages();
                                     }
                                 });
 
@@ -205,7 +306,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         // Setup mapping from cursor to view fields:
         String[] fromFieldNames = new String[]
-                {DBAdapter.KEY_TITLE, DBAdapter.KEY_DATE, DBAdapter.KEY_URL};
+                {DBAdapter.KEY_TITLE, DBAdapter.KEY_DATE_PUB, DBAdapter.KEY_URL};
         int[] toViewIDs = new int[]
                 {R.id.item_name, R.id.item_favcolour, R.id.item_otp};
 
@@ -319,7 +420,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         });
 
 
-    }
+    } // populateListViewFromDB ends
 
     public String getTimeAgo(long time, Context ctx) {
 
@@ -387,7 +488,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
-            long newId = myDb.insertRow("Result", "Its working", 10000);
+            //long newId = myDb.insertRow("Result", "Its working", 10000);
             return true;
         }
 
@@ -399,24 +500,26 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
      */
     @Override
     public void onRefresh() {
-        fetchMovies();
+        Log.e(TAG, "OnRefresh..");
+        fetchMessages();
     }
     /**
      * Fetching movies json by making http call
      */
-    private void fetchMovies() {
+    private void fetchMessages() {
 
         // showing refresh animation before making http call
         swipeRefreshLayout.setRefreshing(true);
 
         // appending offset to url
-        String url = URL_TOP_250 + offSet;
+        String url = URL_NOTI;
 
         // Volley's json array request object
         JsonArrayRequest req = new JsonArrayRequest(url,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
+                        int found=0;
                         Log.d(TAG, response.toString());
 
                         if (response.length() > 0) {
@@ -424,24 +527,44 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                             // looping through json and adding to movies list
                             for (int i = 0; i < response.length(); i++) {
                                 try {
-                                    JSONObject movieObj = response.getJSONObject(i);
+                                    JSONObject messageObj = response.getJSONObject(i);
 
-                                    int rank = movieObj.getInt("rank");
-                                    String title = movieObj.getString("title");
+                                    Date timeInMillis = new Date();
 
-                                    Movie m = new Movie(rank, title);
+                                    int id          = messageObj.getInt("id");
+                                    String title    = messageObj.getString("title");
+                                    String url      = messageObj.getString("url");
+                                    long date_pub      = messageObj.getLong("date");
+                                    String desc     = messageObj.getString("description");
 
-                                    movieList.add(0, m);
 
-                                    // updating offset value to highest value
-                                    if (rank >= offSet)
-                                        offSet = rank;
+
+                                    // search for this id in existing Message list
+                                    for( Message msg_iter : messageList){
+                                        if(msg_iter.id == id) {
+                                            found++;
+                                            break;
+                                        }
+                                    }
+                                    if(found == 0) {
+                                        // insert to internal message list
+                                        Message m = new Message(id, title,url,timeInMillis.getTime()/1000,date_pub,desc);
+                                        messageList.add(0, m);
+                                        // TODO: check whether order of messages will change on the go... as message list is updated from online, on the go
+
+                                        //insert in to internal db
+                                        myDb.insertRow(id,title,url,timeInMillis.getTime()/1000,date_pub,desc);
+                                        Log.e(TAG, "Updated database...");
+                                    }
+
 
                                 } catch (JSONException e) {
                                     Log.e(TAG, "JSON Parsing error: " + e.getMessage());
                                 }
                             }
+                            Log.e(TAG, found+" out of"+response.length()+" is alredy in  database...");
 
+                            // TODO: 3/26/2016 call only if updated?
                             adapter.notifyDataSetChanged();
                         }
 
@@ -463,5 +586,31 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         // Adding request to request queue
         MyApplication.getInstance().addToRequestQueue(req);
+    }
+
+    private int populateMessageListFromInternalDB() {
+
+        Cursor cursor = myDb.getAllRows();
+        if( cursor.getCount() > 0 ) {
+
+            for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+
+                Message m = new Message(cursor.getInt(DBAdapter.COL_ROWID)
+                        , cursor.getString(DBAdapter.COL_TITLE)
+                        , cursor.getString(DBAdapter.COL_URL)
+                        , cursor.getLong(DBAdapter.COL_DATE_RCVD)
+                        , cursor.getLong(DBAdapter.COL_DATE_PUB)
+                        , cursor.getString(DBAdapter.COL_DESCRIPRION));
+
+                messageList.add(0, m);
+            }
+            Log.e(TAG,"Updated MessageList from DB: count = "+cursor.getCount());
+            return cursor.getCount();
+
+        } else {
+            Log.e(TAG,"DB is empty");
+            return 0;
+        }
+
     }
 }

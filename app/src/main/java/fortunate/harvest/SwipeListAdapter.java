@@ -11,31 +11,29 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import fortunate.harvest.R;
-
 /**
  * Created by Ravi on 13/05/15.
  */
 public class SwipeListAdapter extends BaseAdapter {
     private Activity activity;
     private LayoutInflater inflater;
-    private List<Movie> movieList;
+    private List<Message> messageList;
     private String[] bgColors;
 
-    public SwipeListAdapter(Activity activity, List<Movie> movieList) {
+    public SwipeListAdapter(Activity activity, List<Message> messageList) {
         this.activity = activity;
-        this.movieList = movieList;
+        this.messageList = messageList;
         bgColors = activity.getApplicationContext().getResources().getStringArray(R.array.movie_serial_bg);
     }
 
     @Override
     public int getCount() {
-        return movieList.size();
+        return messageList.size();
     }
 
     @Override
     public Object getItem(int location) {
-        return movieList.get(location);
+        return messageList.get(location);
     }
 
     @Override
@@ -55,8 +53,8 @@ public class SwipeListAdapter extends BaseAdapter {
         TextView serial = (TextView) convertView.findViewById(R.id.item_name);
         TextView title = (TextView) convertView.findViewById(R.id.item_otp);
 
-        serial.setText(String.valueOf(movieList.get(position).id));
-        title.setText(movieList.get(position).title);
+        serial.setText(String.valueOf(messageList.get(position).id));
+        title.setText(messageList.get(position).title);
 
         String color = bgColors[position % bgColors.length];
         serial.setBackgroundColor(Color.parseColor(color));

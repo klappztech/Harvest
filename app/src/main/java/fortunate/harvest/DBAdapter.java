@@ -23,33 +23,38 @@ public class DBAdapter {
 	private static final String TAG = "DBAdapter";
 	
 	// DB Fields
-	public static final String KEY_ROWID = "_id";
-	public static final int COL_ROWID = 0;
+
 	/*
 	 * CHANGE 1:
 	 */
 	// TODO: Setup your fields here:
-	public static final String KEY_TITLE = "name";
-	public static final String KEY_URL = "url";
-	public static final String KEY_DATE = "date";
-	
+	public static final String KEY_ROWID            = "_id";
+	public static final String KEY_TITLE 			= "title";
+	public static final String KEY_URL 				= "url";
+	public static final String KEY_DATE_RCVD        = "date_r";
+	public static final String KEY_DATE_PUB         = "date_p";
+	public static final String KEY_DESCRIPRION 		= "description";
+
 	// TODO: Setup your field numbers here (0 = KEY_ROWID, 1=...)
-	public static final int COL_TITLE = 1;
-	public static final int COL_URL = 2;
-	public static final int COL_DATE = 3;
+	public static final int COL_ROWID           = 0;
+	public static final int COL_TITLE 	        = 1;
+	public static final int COL_URL 		    = 2;
+	public static final int COL_DATE_RCVD	    = 3;
+	public static final int COL_DATE_PUB		= 4;
+	public static final int COL_DESCRIPRION     = 5;
 
 	
-	public static final String[] ALL_KEYS = new String[] {KEY_ROWID, KEY_TITLE, KEY_URL, KEY_DATE};
+	public static final String[] ALL_KEYS = new String[] {KEY_ROWID, KEY_TITLE, KEY_URL, KEY_DATE_RCVD, KEY_DATE_PUB,KEY_DESCRIPRION};
 	
 	// DB info: it's name, and the table we are using (just one).
 	public static final String DATABASE_NAME = "MyDb";
-	public static final String DATABASE_TABLE = "mainTable";
+	public static final String DATABASE_TABLE = "internal_notifications";
 	// Track DB version if a new version of your app changes the format.
-	public static final int DATABASE_VERSION = 2;	
+	public static final int DATABASE_VERSION = 6;
 	
 	private static final String DATABASE_CREATE_SQL =
 			"create table " + DATABASE_TABLE 
-			+ " (" + KEY_ROWID + " integer primary key autoincrement, "
+			+ " (" + KEY_ROWID + " integer primary key , "
 			
 			/*
 			 * CHANGE 2:
@@ -63,8 +68,10 @@ public class DBAdapter {
 			// NOTE: All must be comma separated (end of line!) Last one must have NO comma!!
 			+ KEY_TITLE + " text not null, "
 			+ KEY_URL + " text not null, "
-			+ KEY_DATE + " integer not null"
-			
+			+ KEY_DATE_RCVD + " long not null,"
+			+ KEY_DATE_PUB + " long not null,"
+                    + KEY_DESCRIPRION + " text not null"
+
 			// Rest  of creation:
 			+ ");";
 	
@@ -95,7 +102,7 @@ public class DBAdapter {
 	}
 	
 	// Add a new set of values to the database.
-	public long insertRow(String title, String url, long date) {
+	public long insertRow(int id, String title, String url, long date_rcvd, long date_pub, String description) {
 		/*
 		 * CHANGE 3:
 		 */		
@@ -103,10 +110,13 @@ public class DBAdapter {
 		// TODO: Also change the function's arguments to be what you need!
 		// Create row's data:
 		ContentValues initialValues = new ContentValues();
+		initialValues.put(KEY_ROWID, id);
 		initialValues.put(KEY_TITLE, title);
 		initialValues.put(KEY_URL, url);
-		initialValues.put(KEY_DATE, date);
-		
+		initialValues.put(KEY_DATE_RCVD, date_rcvd);
+		initialValues.put(KEY_DATE_PUB, date_pub);
+		initialValues.put(KEY_DESCRIPRION, description);
+
 		// Insert it into the database.
 		return db.insert(DATABASE_TABLE, null, initialValues);
 	}
@@ -132,7 +142,7 @@ public class DBAdapter {
 	public Cursor getAllRows() {
 		String where = null;
 		Cursor c = 	db.query(true, DATABASE_TABLE, ALL_KEYS,
-							where, null, null, null, KEY_DATE+" DESC", null);
+							where, null, null, null, KEY_DATE_PUB +" DESC", null);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -163,7 +173,7 @@ public class DBAdapter {
 		ContentValues newValues = new ContentValues();
 		newValues.put(KEY_TITLE, title);
 		newValues.put(KEY_URL, url);
-		newValues.put(KEY_DATE, date);
+		newValues.put(KEY_DATE_PUB, date);
 		
 		// Insert it into the database.
 		return db.update(DATABASE_TABLE, newValues, where, null) != 0;

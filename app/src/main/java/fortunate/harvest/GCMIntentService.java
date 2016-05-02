@@ -117,7 +117,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 
         // add to database
         openDB(context);
-        long newId = myDb.insertRow("Result", message, timeInMillis.getTime()/1000);
+        //long newId = myDb.insertRow("Result", message, timeInMillis.getTime()/1000,);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)

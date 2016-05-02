@@ -69,8 +69,11 @@ public class MainActivity extends AppCompatActivity  {
             alert.showAlertDialog(MainActivity.this,
                     "Internet Connection Error",
                     "Please connect to working Internet connection", false);
+            Toast.makeText(getApplicationContext(), "Showing offline", Toast.LENGTH_LONG).show();
+            Intent home_intent = new Intent(getApplicationContext(), HomeActivity.class);
+            startActivity(home_intent);
             // stop executing code by return
-            return;
+            //return;
         }
 
         // Getting name, email from intent
