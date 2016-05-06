@@ -12,7 +12,7 @@
 
     <item
         android:id="@+id/action_settings"
-        android:title="Settings"
+        android:title="Logout"
         android:orderInCategory="100"
         app:showAsAction="never" />
 </menu>

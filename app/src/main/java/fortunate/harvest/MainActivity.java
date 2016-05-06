@@ -48,6 +48,9 @@ public class MainActivity extends AppCompatActivity  {
     public static String email;
     private Toolbar mToolbar;
 
+    // User Session Manager Class
+    UserSessionManager session;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +61,9 @@ public class MainActivity extends AppCompatActivity  {
 
 //        setSupportActionBar(mToolbar);
 //        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        // User Session Manager
+        session = new UserSessionManager(getApplicationContext());
 
 
 
@@ -100,19 +106,44 @@ public class MainActivity extends AppCompatActivity  {
         // Check if regid already presents
         if (regId.equals("")) {
             // Registration is not present, register now with GCM
-            GCMRegistrar.register(this, SENDER_ID);
+            GCMRegistrar.register(getApplicationContext(), SENDER_ID);
         } else {
             // Device is already registered on GCM
             if (GCMRegistrar.isRegisteredOnServer(this)) {
                 // Skips registration.
                 Toast.makeText(getApplicationContext(), "Already registered with GCM", Toast.LENGTH_LONG).show();
+
+                //update server
+                final Context context = getApplicationContext();
+                mRegisterTask = new AsyncTask<Void, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        // Register on our server
+                        // On server creates a new user
+                        ServerUtilities.register(context, name, email, regId);
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void result) {
+                        mRegisterTask = null;
+                    }
+
+                };
+                mRegisterTask.execute(null, null, null);;
+
+                //set as logged in
+                session.createUserLoginSession(name,email,regId);
+
                 Intent home_intent = new Intent(getApplicationContext(), HomeActivity.class);
                 startActivity(home_intent);
+                finish();
             } else {
                 // Try to register again, but not in the UI thread.
                 // It's also necessary to cancel the thread onDestroy(),
                 // hence the use of AsyncTask instead of a raw thread.
-                final Context context = this;
+                final Context context = getApplicationContext();
                 mRegisterTask = new AsyncTask<Void, Void, Void>() {
 
                     @Override

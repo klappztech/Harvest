@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.google.android.gcm.GCMRegistrar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,6 +61,13 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
     int selected_count = 0;
     private BroadcastReceiver broadcastURLReceiver;
 
+    // User Session Manager Class
+    UserSessionManager session;
+
+    // Asyntask
+    AsyncTask<Void, Void, Void> mUnRegisterTask;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +78,9 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        // User Session Manager
+        session = new UserSessionManager(this);
 
         //database
         openDB();
@@ -487,8 +499,39 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_search) {
-            //long newId = myDb.insertRow("Result", "Its working", 10000);
+        if (id == R.id.action_settings) {
+
+            //logout
+            if(session.isUserLoggedIn()) {
+                //move to logout
+                session.logoutUser();
+
+                mUnRegisterTask = new AsyncTask<Void, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        // Register on our server
+                        // On server creates a new user
+                        // TODO: 5/7/2016 this is not successful
+                        ServerUtilities.unregister(getApplicationContext(), session.getGcmId());
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void result) {
+                        mUnRegisterTask = null;
+                    }
+
+                };
+                mUnRegisterTask.execute(null, null, null);
+
+
+
+                //GCMRegistrar.unregister(getApplicationContext());//MyApplication.getInstance().session.getGcmId()
+
+                Toast.makeText(getApplicationContext(), "I am logged in, but loggin out", Toast.LENGTH_LONG);
+            }
+
             return true;
         }
 

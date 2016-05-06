@@ -13,6 +13,8 @@ import com.android.volley.toolbox.Volley;
 
 public class MyApplication extends Application {
 
+//    UserSessionManager session;
+
     public static final String TAG = MyApplication.class
             .getSimpleName();
 
