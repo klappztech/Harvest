@@ -35,7 +35,13 @@ public class UserSessionManager {
     public static final String KEY_EMAIL = "email";
 
     // gcmID
-    public static final String KEY_GCM = "email";
+    public static final String KEY_GCM = "gcm_id";
+
+    // std
+    public static final String KEY_STD = "gcm_std";
+
+    // course
+    public static final String KEY_COURSE = "gcm_course";
 
     // Constructor
     public UserSessionManager(Context context){
@@ -45,7 +51,7 @@ public class UserSessionManager {
     }
 
     //Create login session
-    public void createUserLoginSession(String name, String email,String gcmId){
+    public void createUserLoginSession(String name, String email,String gcmId,int std, int course){
         // Storing login value as TRUE
         editor.putBoolean(IS_USER_LOGIN, true);
 
@@ -58,6 +64,12 @@ public class UserSessionManager {
         // Storing email in pref
         editor.putString(KEY_GCM, gcmId);
 
+        // Storing standard
+        editor.putInt(KEY_STD, std);
+
+        // Storing course
+        editor.putInt(KEY_COURSE, course);
+
         // commit changes
         editor.commit();
 
@@ -67,6 +79,16 @@ public class UserSessionManager {
     public String getGcmId() {
 
         return pref.getString(KEY_GCM, "");
+    }
+
+    public int getStd() {
+
+        return pref.getInt(KEY_STD, 9999);
+    }
+
+    public int getcourse() {
+
+        return pref.getInt(KEY_COURSE, 9999);
     }
 
     /**

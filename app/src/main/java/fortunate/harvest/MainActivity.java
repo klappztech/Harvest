@@ -46,6 +46,9 @@ public class MainActivity extends AppCompatActivity  {
 
     public static String name;
     public static String email;
+    public static int standard;
+    public static int course;
+
     private Toolbar mToolbar;
 
     // User Session Manager Class
@@ -87,6 +90,8 @@ public class MainActivity extends AppCompatActivity  {
 
         name =  i.getStringExtra("name");
         email = i.getStringExtra("email");
+        standard = i.getIntExtra("standard",9999);
+        course = i.getIntExtra("course",9999);
 
         // Make sure the device has the proper dependencies.
         GCMRegistrar.checkDevice(this);
@@ -134,7 +139,7 @@ public class MainActivity extends AppCompatActivity  {
                 mRegisterTask.execute(null, null, null);;
 
                 //set as logged in
-                session.createUserLoginSession(name,email,regId);
+                session.createUserLoginSession(name,email,regId,standard,course);
 
                 Intent home_intent = new Intent(getApplicationContext(), HomeActivity.class);
                 startActivity(home_intent);

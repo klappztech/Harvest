@@ -155,15 +155,18 @@ public class RegisterActivity extends AppCompatActivity {
                                 try {
                                     JSONObject messageObj = response.getJSONObject(i);
 
-                                    int registered = messageObj.getInt("registered");
+                                    int registered        = messageObj.getInt("registered");
                                     int gcmRegistered     = messageObj.getInt("gcm_registered");
+                                    int standard          = messageObj.getInt("standard");
+                                    int course            = messageObj.getInt("course");
+                                    String gcm_id         = messageObj.getString("gcm_id");
 
                                     if(registered==1 && gcmRegistered==1 ) {
                                         //update shared preferences as logged in
                                         // this is a shitty way, but let it be like this now
                                         // TODO: 5/7/2016 get gcm from db
 
-                                        session.createUserLoginSession(username,password,"");
+                                        session.createUserLoginSession(username,password,gcm_id,standard,course);
 
                                         //move to HomeActivity
                                         Intent intentHome = new Intent(getApplicationContext(), HomeActivity.class);
@@ -179,6 +182,8 @@ public class RegisterActivity extends AppCompatActivity {
                                         // Sending registration details to MainActivity
                                         intentMain.putExtra("name", username);
                                         intentMain.putExtra("email", password);
+                                        intentMain.putExtra("standard", standard);
+                                        intentMain.putExtra("course", course);
 
                                         startActivity(intentMain);
                                         finish();

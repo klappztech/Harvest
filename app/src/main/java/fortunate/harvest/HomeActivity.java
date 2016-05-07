@@ -555,7 +555,8 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         swipeRefreshLayout.setRefreshing(true);
 
         // appending offset to url
-        String url = URL_NOTI;
+        String url = URL_NOTI+"?std="+session.getStd()+"&course="+session.getcourse();
+        Log.e("get_notification", url);
 
         // Volley's json array request object
         JsonArrayRequest req = new JsonArrayRequest(url,
