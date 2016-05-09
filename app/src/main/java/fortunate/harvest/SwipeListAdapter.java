@@ -50,14 +50,16 @@ public class SwipeListAdapter extends BaseAdapter {
         if (convertView == null)
             convertView = inflater.inflate(R.layout.item_layout, null);
 
-        TextView serial = (TextView) convertView.findViewById(R.id.item_name);
-        TextView title = (TextView) convertView.findViewById(R.id.item_otp);
+        TextView title = (TextView) convertView.findViewById(R.id.item_title);
+        TextView description = (TextView) convertView.findViewById(R.id.item_description);
+        TextView date = (TextView) convertView.findViewById(R.id.item_date);
 
-        serial.setText(String.valueOf(messageList.get(position).id));
         title.setText(messageList.get(position).title);
+        description.setText(messageList.get(position).description);
+        date.setText(String.valueOf(messageList.get(position).date_pub));
 
-        String color = bgColors[position % bgColors.length];
-        serial.setBackgroundColor(Color.parseColor(color));
+        //String color = bgColors[position % bgColors.length];
+        //description.setBackgroundColor(Color.parseColor(color));
 
         return convertView;
     }

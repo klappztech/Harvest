@@ -3,14 +3,13 @@ package fortunate.harvest;
 import static fortunate.harvest.CommonUtilities.DISPLAY_MESSAGE_ACTION;
 import static fortunate.harvest.CommonUtilities.EXTRA_MESSAGE;
 import static fortunate.harvest.CommonUtilities.SENDER_ID;
-import android.app.Activity;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,16 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.google.android.gcm.GCMRegistrar;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity  {
     // label to display gcm messages
@@ -166,6 +156,8 @@ public class MainActivity extends AppCompatActivity  {
 
                 };
                 mRegisterTask.execute(null, null, null);
+                //set as logged in
+                session.createUserLoginSession(name, email, regId, standard, course);
             }
         }
     }
@@ -173,7 +165,7 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_home, menu);
         return true;
     }
     @Override

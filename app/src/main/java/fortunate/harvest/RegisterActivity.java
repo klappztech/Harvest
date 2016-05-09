@@ -5,7 +5,7 @@ package fortunate.harvest;
  */
 import static fortunate.harvest.CommonUtilities.SENDER_ID;
 import static fortunate.harvest.CommonUtilities.SERVER_URL;
-import android.app.Activity;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,8 +26,6 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Date;
 
 
 public class RegisterActivity extends AppCompatActivity {
@@ -54,25 +52,33 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+
+
         // for toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        // User Session Manager
-        session = new UserSessionManager(getApplicationContext());
 
         cd = new ConnectionDetector(getApplicationContext());
 
-        // Check if Internet present
-        if (!cd.isConnectingToInternet()) {
+        // User Session Manager
+        session = new UserSessionManager(getApplicationContext());
+        if(session.isUserLoggedIn()) {
+            //move to HomeActivity
+            Intent intentHome = new Intent(getApplicationContext(), HomeActivity.class);
+            startActivity(intentHome);
+            finish();
+        } else if (!cd.isConnectingToInternet()) {
             // Internet Connection is not present
             alert.showAlertDialog(RegisterActivity.this,
                     "Internet Connection Error",
                     "Please connect to working Internet connection", false);
             // stop executing code by return
             return;
+        } else {
+            //Connection is there, be in Register activity
         }
 
         // Check if GCM configuration is set
@@ -85,26 +91,14 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        txtName = (EditText) findViewById(R.id.txtName);
-        txtEmail = (EditText) findViewById(R.id.txtEmail);
+        txtName = (EditText) findViewById(R.id.txtUsername);
+        txtEmail = (EditText) findViewById(R.id.txtPassword);
         btnRegister = (Button) findViewById(R.id.btnRegister);
 
         Toast.makeText(getApplicationContext(),
                 "User Login Status: " + session.isUserLoggedIn(),
                 Toast.LENGTH_LONG).show();
 
-        if(session.isUserLoggedIn()) {
-            //move to HomeActivity
-            Intent intentHome = new Intent(getApplicationContext(), HomeActivity.class);
-
-            // Registering user on our server
-            // Sending registration details to MainActivity
-//            intentMain.putExtra("name", username);
-//            intentMain.putExtra("email", password);
-
-            startActivity(intentHome);
-            finish();
-        }
 
 
         /*
@@ -161,19 +155,7 @@ public class RegisterActivity extends AppCompatActivity {
                                     int course            = messageObj.getInt("course");
                                     String gcm_id         = messageObj.getString("gcm_id");
 
-                                    if(registered==1 && gcmRegistered==1 ) {
-                                        //update shared preferences as logged in
-                                        // this is a shitty way, but let it be like this now
-                                        // TODO: 5/7/2016 get gcm from db
-
-                                        session.createUserLoginSession(username,password,gcm_id,standard,course);
-
-                                        //move to HomeActivity
-                                        Intent intentHome = new Intent(getApplicationContext(), HomeActivity.class);
-                                        startActivity(intentHome);
-                                        finish();
-
-                                    } else if(registered==1 && gcmRegistered==0 ) {
+                                   if(registered==1 ) {
                                        //get GCM Id and update gcm users table, then update shared pref
                                         // Launch Main Activity
                                         Intent intentMain = new Intent(getApplicationContext(), MainActivity.class);
@@ -220,7 +202,7 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_register, menu);
         return true;
     }
     @Override
@@ -231,12 +213,9 @@ public class RegisterActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_help) {
 
-            Intent i = new Intent(getApplicationContext(), HomeActivity.class);
-            startActivity(i);
-
-
+            // TODO: 5/8/2016 show help
             return true;
         }
 

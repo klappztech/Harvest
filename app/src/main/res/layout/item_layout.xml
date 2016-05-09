@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="5dp"
+    android:padding="15dp"
     >
 
     <ImageView
@@ -17,38 +17,46 @@
          />
 
     <TextView
-        android:id="@+id/item_name"
+        android:id="@+id/item_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="FROM"
-        android:layout_below="@+id/item_otp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="The description will be displayed here"
+        android:layout_below="@+id/item_title"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:paddingBottom="5dp"
-        android:textColor="@color/light_blue"/>
+        android:textColor="@color/list_desc"
+        android:singleLine="true"
+        android:layout_marginTop="5dp" />
 
 
 
     <TextView
-        android:id="@+id/item_favcolour"
+        android:id="@+id/item_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="date"
+        android:text="12/12/2016"
 
         android:singleLine="true"
         android:layout_below="@+id/item_icon"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:textColor="@color/list_desc"/>
 
     <TextView
-        android:id="@+id/item_otp"
+        android:id="@+id/item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="OTP"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="This Is A Title"
         android:singleLine="true"
-        android:textSize="30dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:textColor="@color/list_title"
+        android:textStyle="bold" />
+
+
 
 </RelativeLayout>

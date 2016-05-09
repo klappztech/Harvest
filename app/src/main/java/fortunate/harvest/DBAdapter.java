@@ -102,7 +102,7 @@ public class DBAdapter {
 	}
 	
 	// Add a new set of values to the database.
-	public long insertRow(int id, String title, String url, long date_rcvd, long date_pub, String description) {
+	public long insertRow(int id, String title, String url, String date_rcvd, String date_pub, String description) {
 		/*
 		 * CHANGE 3:
 		 */		

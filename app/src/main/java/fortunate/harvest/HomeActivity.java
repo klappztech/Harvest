@@ -12,27 +12,22 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.ActionMode;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.google.android.gcm.GCMRegistrar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,12 +38,14 @@ import java.util.List;
  */
 public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
+
     private Toolbar mToolbar;
     DBAdapter myDb;
 
     private String TAG = "mahc";
 
     private String URL_NOTI = "http://www.harvestentrancecoaching.com/app/get_notifications.php";
+    private static final String URL_WEB_VIEW ="http://www.harvestentrancecoaching.com/app/web_view.php"; ;
 
     private SwipeRefreshLayout swipeRefreshLayout;
     // initially offset will be 0, later will be updated while parsing the json
@@ -57,7 +54,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
     private List<Message> messageList;
     private ListView listView;
 
-    List<Long> selected_list_items = new ArrayList<Long>();
+    List<Integer> mapping_to_db = new ArrayList<>();
     int selected_count = 0;
     private BroadcastReceiver broadcastURLReceiver;
 
@@ -94,96 +91,12 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         messageList = new ArrayList<>();
         adapter = new SwipeListAdapter(this, messageList);
         listView.setAdapter(adapter);
+        listView.setEmptyView(findViewById(R.id.emptyView));
 
         // list view touch actions
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         listView.setItemsCanFocus(false);
-        listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-            @Override
-            public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
-                if (b) {
-                    selected_count++;
-                    actionMode.setTitle(selected_count + " items selected");
-                    selected_list_items.add(l);
-                } else {
-                    selected_count--;
-                    actionMode.setTitle(selected_count + " items selected");
-                    selected_list_items.remove(l);
-                }
 
-            }
-
-            @Override
-            public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-                MenuInflater inflater = getMenuInflater();
-                inflater.inflate(R.menu.menu_otps, menu);
-                selected_count = 0;
-                return true;
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-                return false;
-            }
-
-            @Override
-            public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-
-                switch (menuItem.getItemId()) {
-                    case R.id.delete_id:
-                        if (selected_list_items.isEmpty()) {
-                            Toast.makeText(getApplicationContext(), "Select items to delete!", Toast.LENGTH_LONG);
-                        }
-                        for (long id : selected_list_items) {
-                            Cursor cursor = myDb.getRow(id);
-                            if (cursor.moveToFirst()) {
-                                long idDB = cursor.getLong(DBAdapter.COL_ROWID);
-                                // String name = cursor.getString(DBAdapter.COL_TITLE);
-                                String url = cursor.getString(DBAdapter.COL_URL);
-                                //String favColour = cursor.getString(DBAdapter.COL_FAVCOLOUR);
-
-                                myDb.deleteRow(idDB);
-                            }
-                            cursor.close();
-
-                        }
-                        int msg_count  = populateMessageListFromInternalDB();
-
-                        if(msg_count > 0) {
-                            // display list view
-                            adapter.notifyDataSetChanged();
-
-                        } else {
-                            // goto next step, ie: get data from online
-                        }
-
-                        Toast.makeText(getApplicationContext(), selected_count + "items deleted", Toast.LENGTH_SHORT);
-
-                        actionMode.finish();
-                        return true;
-//                        break;
-                    case R.id.clear_id:
-                        selected_count = 0;
-                        selected_list_items.clear();
-                        for (int i = 0; i < listView.getAdapter().getCount(); i++) {
-                            listView.setItemChecked(i, true);
-                        }
-
-                        break;
-
-                    default:
-                        return false;
-                }
-                return false;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode actionMode) {
-                selected_count = 0;
-                selected_list_items.clear();
-            }
-        });
-    // touch action ends
         swipeRefreshLayout.setOnRefreshListener(this);
 
         /**
@@ -206,39 +119,31 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                                             // goto next step, ie: get data from online
                                         }
 
-
-                                        fetchMessages();
+                                        if(true) { // TODO: 5/8/2016 net cnected )
+                                            fetchMessagesFromOnlineDB();
+                                        }
                                     }
                                 });
 
 
 
-        //populateListViewFromDB();
-
         //******************** Broadcast reciever *********************
+        // on getting notification, broadcast to update listview => check and remove // TODO: 5/8/2016
         broadcastURLReceiver =  new BroadcastReceiver() {
             //@SuppressLint("NewApi")
             @Override
             public void onReceive(Context context, Intent intent) {
-
                 String action = intent.getStringExtra("ACTION");
-
                 openDB();
-
 
                 if(action == "reload") {
                     Log.e("mahc", "Broadcast_received: reload");
-                    populateListViewFromDB();
+                    //populateListViewFromDB();
                 }
 
             }
         };
-
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastURLReceiver, new IntentFilter("ACTION_BROADCAST"));
-
-
-
-
     }
 
     private void registerListClickCallback() {
@@ -246,20 +151,22 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View viewClicked,
-                                    int position, long idInDB) {
-                // Toast.makeText(getApplicationContext(), "Clicked on Item:"+idInDB, Toast.LENGTH_SHORT).show();
-                ActionOnClick(idInDB);
+                                    int position, long id) {
+                Toast.makeText(getApplicationContext(), "Clicked on Item:id="+id+", pos="+position , Toast.LENGTH_SHORT).show();
+                ActionOnClick(id);
             }
         });
     }
 
-    private void ActionOnClick(long idInDB) {
+    private void ActionOnClick(long id) {
         View v=null;
-        Cursor cursor = myDb.getRow(idInDB);
+        int idInOnlineDB = mapping_to_db.get((int) id);
+        Cursor cursor = myDb.getRow(idInOnlineDB);
         if (cursor.moveToFirst()) {
             long idDB = cursor.getLong(DBAdapter.COL_ROWID);
-            String url = cursor.getString(DBAdapter.COL_URL);
+            String url = URL_WEB_VIEW +"?row="+idInOnlineDB;
 
+            Log.e("HomeActivity", "url : "+ url);
 
             Intent web_intent = new Intent(getApplicationContext(), WebActivity.class);
             web_intent.putExtra("url",url);
@@ -271,20 +178,6 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     }
 
-    private void sendBroadcastMessage(String url) {
-
-        Intent intent = new Intent("OPEN_WEB_PAGE");
-        intent.putExtra("url", url);
-        //intent.putExtra("mode", url);
-        //intent.putExtra("close", url);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-
-        Log.e("mahc", "==========sent broadcast"+url);
-
-        // close this activity
-        this.finish();
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -293,146 +186,15 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void closeDB() {
         myDb.close();
-        Log.e("mahc", "MainActivity::Database: close");
+        Log.e("mahc", "HOMEActivity::Database: close");
     }
 
     private void openDB() {
         myDb = new DBAdapter(this);
         myDb.open();
-        Log.e("mahc", "MainActivity::Database: open");
+        Log.e("mahc", "HOMEActivity::Database: open");
     }
 
-    public void populateListViewFromDB() {
-        Log.e("mahc", "populateListViewFromDB()");
-        // Set the adapter for the list view
-        final ListView myList = (ListView) findViewById(R.id.listView);
-        View empty = findViewById(R.id.emptyView);
-
-        myList.setEmptyView(empty);
-
-        Cursor cursor = myDb.getAllRows();
-
-        // Allow activity to manage lifetime of the cursor.
-        // DEPRECATED! Runs on the UI thread, OK for small/short queries.
-        startManagingCursor(cursor);
-
-        // Setup mapping from cursor to view fields:
-        String[] fromFieldNames = new String[]
-                {DBAdapter.KEY_TITLE, DBAdapter.KEY_DATE_PUB, DBAdapter.KEY_URL};
-        int[] toViewIDs = new int[]
-                {R.id.item_name, R.id.item_favcolour, R.id.item_otp};
-
-        // Create adapter to may columns of the DB onto elemesnt in the UI.
-        SimpleCursorAdapter myCursorAdapter =
-                new SimpleCursorAdapter(
-                        this,        // Context
-                        R.layout.item_layout,    // Row layout template
-                        cursor,                    // cursor (set of DB records to map)
-                        fromFieldNames,            // DB Column names
-                        toViewIDs                // View IDs to put information in
-                );
-
-        //for changing the date to good format
-        myCursorAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-
-            public boolean setViewValue(View aView, Cursor aCursor, int aColumnIndex) {
-
-                if (aColumnIndex == 3) {
-                    String createDate = aCursor.getString(aColumnIndex);
-                    String dateString = getTimeAgo(Long.parseLong(createDate)*1000,getApplicationContext());
-
-                    TextView textView = (TextView) aView;
-                    textView.setText(dateString);
-                    return true;
-                }
-
-                return false;
-            }
-        });
-
-
-        myList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        myList.setItemsCanFocus(false);
-        myList.setAdapter(myCursorAdapter);
-        myList.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-            @Override
-            public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
-                if (b) {
-                    selected_count++;
-                    actionMode.setTitle(selected_count + " items selected");
-                    selected_list_items.add(l);
-                } else {
-                    selected_count--;
-                    actionMode.setTitle(selected_count + " items selected");
-                    selected_list_items.remove(l);
-                }
-
-            }
-
-            @Override
-            public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-                MenuInflater inflater = getMenuInflater();
-                inflater.inflate(R.menu.menu_otps, menu);
-                selected_count=0;
-                return true;
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-                return false;
-            }
-
-            @Override
-            public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-
-                switch (menuItem.getItemId()) {
-                    case R.id.delete_id:
-                        if (selected_list_items.isEmpty()) {
-                            Toast.makeText(getApplicationContext(), "Select items to delete!", Toast.LENGTH_LONG);
-                        }
-                        for (long id : selected_list_items) {
-                            Cursor cursor = myDb.getRow(id);
-                            if (cursor.moveToFirst()) {
-                                long idDB = cursor.getLong(DBAdapter.COL_ROWID);
-                                // String name = cursor.getString(DBAdapter.COL_TITLE);
-                                String url = cursor.getString(DBAdapter.COL_URL);
-                                //String favColour = cursor.getString(DBAdapter.COL_FAVCOLOUR);
-
-                                myDb.deleteRow(idDB);
-                            }
-                            cursor.close();
-
-                        }
-                        populateListViewFromDB();
-                        Toast.makeText(getApplicationContext(), selected_count + "items deleted", Toast.LENGTH_SHORT);
-
-                        actionMode.finish();
-                        return true;
-//                        break;
-                    case R.id.clear_id:
-                        selected_count=0;
-                        selected_list_items.clear();
-                        for ( int i=0; i < myList.getAdapter().getCount(); i++) {
-                            myList.setItemChecked(i, true);
-                        }
-
-                        break;
-
-                    default:
-                        return false;
-                }
-                return false;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode actionMode) {
-                selected_count = 0;
-                selected_list_items.clear();
-            }
-        });
-
-
-    } // populateListViewFromDB ends
 
     public String getTimeAgo(long time, Context ctx) {
 
@@ -488,7 +250,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_home, menu);
         return true;
     }
     @Override
@@ -499,7 +261,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
 
             //logout
             if(session.isUserLoggedIn()) {
@@ -544,12 +306,16 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     public void onRefresh() {
         Log.e(TAG, "OnRefresh..");
-        fetchMessages();
+        if(true) { // TODO: 5/8/2016 check is online?
+            fetchMessagesFromOnlineDB();
+        } else {
+            //offline, no need to update
+        }
     }
     /**
      * Fetching movies json by making http call
      */
-    private void fetchMessages() {
+    private void fetchMessagesFromOnlineDB() {
 
         // showing refresh animation before making http call
         swipeRefreshLayout.setRefreshing(true);
@@ -575,10 +341,13 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                                     Date timeInMillis = new Date();
 
+                                    Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                    String date_rcvd = formatter.format(timeInMillis);
+
                                     int id          = messageObj.getInt("id");
                                     String title    = messageObj.getString("title");
                                     String url      = messageObj.getString("url");
-                                    long date_pub      = messageObj.getLong("date");
+                                    String date_pub      = messageObj.getString("date");
                                     String desc     = messageObj.getString("description");
 
 
@@ -592,12 +361,16 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                                     }
                                     if(found == 0) {
                                         // insert to internal message list
-                                        Message m = new Message(id, title,url,timeInMillis.getTime()/1000,date_pub,desc);
-                                        messageList.add(0, m);
+                                        Message m = new Message(id, title,url,date_rcvd,date_pub,desc);
+                                        messageList.add(m);
+                                        //create mapping to db here
+                                        mapping_to_db.add(id);
+
+
                                         // TODO: check whether order of messages will change on the go... as message list is updated from online, on the go
 
                                         //insert in to internal db
-                                        myDb.insertRow(id,title,url,timeInMillis.getTime()/1000,date_pub,desc);
+                                        myDb.insertRow(id,title,url,date_rcvd,date_pub,desc);
                                         Log.e(TAG, "Updated database...");
                                     }
 
@@ -642,11 +415,13 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                 Message m = new Message(cursor.getInt(DBAdapter.COL_ROWID)
                         , cursor.getString(DBAdapter.COL_TITLE)
                         , cursor.getString(DBAdapter.COL_URL)
-                        , cursor.getLong(DBAdapter.COL_DATE_RCVD)
-                        , cursor.getLong(DBAdapter.COL_DATE_PUB)
+                        , cursor.getString(DBAdapter.COL_DATE_RCVD)
+                        , cursor.getString(DBAdapter.COL_DATE_PUB)
                         , cursor.getString(DBAdapter.COL_DESCRIPRION));
 
-                messageList.add(0, m);
+                messageList.add(m);
+                //create mapping to db here
+                mapping_to_db.add(cursor.getInt(DBAdapter.COL_ROWID));
             }
             Log.e(TAG,"Updated MessageList from DB: count = "+cursor.getCount());
             return cursor.getCount();

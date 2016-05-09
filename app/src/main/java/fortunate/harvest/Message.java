@@ -7,8 +7,8 @@ public class Message {
     public  int id;
     public  String title;
     public  String url;
-    public  long date_rcvd;
-    public  long date_pub;
+    public  String date_rcvd;
+    public  String date_pub;
     public  String description;
 
 
@@ -16,7 +16,7 @@ public class Message {
     public Message() {
     }
 
-    public Message(int id, String title, String url,long date_rcvd, long date_pub,  String description) {
+    public Message(int id, String title, String url,String date_rcvd, String date_pub,  String description) {
         this.id = id;
         this.title = title;
         this.url = url;
