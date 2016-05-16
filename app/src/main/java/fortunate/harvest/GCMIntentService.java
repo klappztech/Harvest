@@ -110,16 +110,15 @@ public class GCMIntentService extends GCMBaseIntentService {
         int icon = R.drawable.ic_launcher;
         int mId=0;
         long when = System.currentTimeMillis();
-        NotificationManager notificationManager = (NotificationManager)
-                context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification notification = new Notification(icon, message, when);
+        context.getSystemService(Context.NOTIFICATION_SERVICE);
+        //Notification notification = new Notification(icon, message, when);
 
 
-        String title = context.getString(R.string.app_name);
+        //String title = context.getString(R.string.app_name);
 
-        Date timeInMillis = new Date();
+        //Date timeInMillis = new Date();
 
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         Log.e("mahc", "showing message: "+ message);
 
         // add to database
@@ -129,10 +128,13 @@ public class GCMIntentService extends GCMBaseIntentService {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle("My notification")
+                        .setContentTitle("New message from Harvest")
                         .setContentText(message);
+
+        // clear notification on click
+        mBuilder.setAutoCancel(true);
 // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(context, MainActivity.class);
+        Intent resultIntent = new Intent(context, RegisterActivity.class);
 
 // The stack builder object will contain an artificial back stack for the
 // started Activity.
@@ -140,7 +142,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 // your application to the Home screen.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
 // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addParentStack(RegisterActivity.class);
 // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent =

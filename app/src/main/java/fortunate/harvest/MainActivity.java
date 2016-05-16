@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        //setContentView(R.layout.activity_main);
 
         // for toolbar
         // mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -57,6 +57,8 @@ public class MainActivity extends AppCompatActivity  {
 
         // User Session Manager
         session = new UserSessionManager(getApplicationContext());
+
+        // TODO: 5/10/2016 when logged into new machine, old machine should not get message
 
 
 
@@ -200,7 +202,7 @@ public class MainActivity extends AppCompatActivity  {
              * */
 
             // Showing received message
-            lblMessage.append(newMessage + "\n");
+            //lblMessage.append(newMessage + "\n");
             Toast.makeText(getApplicationContext(), "New Message: " + newMessage, Toast.LENGTH_LONG).show();
 
             // Releasing wake lock

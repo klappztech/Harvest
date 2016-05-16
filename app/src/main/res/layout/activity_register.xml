@@ -9,6 +9,12 @@
         android:id="@+id/toolbar"
         layout="@layout/toolbar" />
 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="523dp"
+        android:orientation="vertical"
+        >
     <TextView android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Username:"
@@ -42,6 +48,23 @@
         android:layout_height="wrap_content"
         android:text="Login"
         android:layout_margin="10dip"/>
+</LinearLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="10dp">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Enter the username and password you got from Harvest Institute of science."
+        android:id="@+id/textView"
+        android:textStyle="italic"
+        android:visibility="invisible" />
 
+</LinearLayout>
 </LinearLayout>

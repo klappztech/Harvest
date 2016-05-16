@@ -63,6 +63,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     // Asyntask
     AsyncTask<Void, Void, Void> mUnRegisterTask;
+    private ConnectionDetector cd;
 
 
     @Override
@@ -78,6 +79,8 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         // User Session Manager
         session = new UserSessionManager(this);
+
+        cd = new ConnectionDetector(getApplicationContext());
 
         //database
         openDB();
@@ -119,8 +122,11 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                                             // goto next step, ie: get data from online
                                         }
 
-                                        if(true) { // TODO: 5/8/2016 net cnected )
+                                        if(cd.isConnectingToInternet()) { // TODO: 5/8/2016 net cnected )
                                             fetchMessagesFromOnlineDB();
+                                        } else {
+                                            Toast.makeText(getApplicationContext(), "Not connected to Internet!",Toast.LENGTH_SHORT);
+                                            swipeRefreshLayout.setRefreshing(false);
                                         }
                                     }
                                 });
@@ -268,6 +274,9 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                 //move to logout
                 session.logoutUser();
 
+                //delete internal DB
+                myDb.deleteAll();
+
                 mUnRegisterTask = new AsyncTask<Void, Void, Void>() {
 
                     @Override
@@ -295,6 +304,10 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
 
             return true;
+        } else  if (id == R.id.action_profile) {
+
+            Intent profile_intent = new Intent(getApplicationContext(), ProfileActivity.class);
+            startActivity(profile_intent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -306,10 +319,12 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     public void onRefresh() {
         Log.e(TAG, "OnRefresh..");
-        if(true) { // TODO: 5/8/2016 check is online?
+
+        if(cd.isConnectingToInternet()) {
             fetchMessagesFromOnlineDB();
         } else {
-            //offline, no need to update
+            Toast.makeText(getApplicationContext(), "Not connected to Internet!",Toast.LENGTH_SHORT);
+            swipeRefreshLayout.setRefreshing(false);
         }
     }
     /**
@@ -330,12 +345,14 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                     @Override
                     public void onResponse(JSONArray response) {
                         int found=0;
+                        boolean isNew;
                         Log.d(TAG, response.toString());
 
                         if (response.length() > 0) {
 
                             // looping through json and adding to movies list
                             for (int i = 0; i < response.length(); i++) {
+                                isNew=true;
                                 try {
                                     JSONObject messageObj = response.getJSONObject(i);
 
@@ -355,11 +372,11 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                                     // search for this id in existing Message list
                                     for( Message msg_iter : messageList){
                                         if(msg_iter.id == id) {
-                                            found++;
+                                            found++;isNew=false;
                                             break;
                                         }
                                     }
-                                    if(found == 0) {
+                                    if(isNew) {
                                         // insert to internal message list
                                         Message m = new Message(id, title,url,date_rcvd,date_pub,desc);
                                         messageList.add(m);

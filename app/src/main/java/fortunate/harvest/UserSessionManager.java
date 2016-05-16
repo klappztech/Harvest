@@ -76,6 +76,11 @@ public class UserSessionManager {
         Log.e("createUserLoginSession", "("+name+","+email+")");
     }
 
+    public String getUsername() {
+
+        return pref.getString(KEY_NAME, "");
+    }
+
     public String getGcmId() {
 
         return pref.getString(KEY_GCM, "");
