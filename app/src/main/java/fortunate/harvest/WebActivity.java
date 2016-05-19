@@ -59,6 +59,7 @@ public class WebActivity extends AppCompatActivity {
     private Toolbar mToolbar;
     Cursor cursor;
     String url;
+    String htmlsrc;
 
 
     @Override
@@ -73,8 +74,8 @@ public class WebActivity extends AppCompatActivity {
         myWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         myWebView.getSettings().setBuiltInZoomControls(true);
 
-        TextView title = (TextView) findViewById(R.id.txtTitleWeb);
-        TextView desc = (TextView) findViewById(R.id.txtDescWeb);
+
+
 
         //database
         openDB();
@@ -90,13 +91,19 @@ public class WebActivity extends AppCompatActivity {
 
         if( cursor.getCount() > 0 ) {
             cursor.moveToFirst();
-                title.setText(cursor.getString(DBAdapter.COL_TITLE));
-                desc.setText(cursor.getString(DBAdapter.COL_DESCRIPRION));
-                url = cursor.getString(DBAdapter.COL_URL);
+            String titleStr = cursor.getString(DBAdapter.COL_TITLE);
+            String decStr = cursor.getString(DBAdapter.COL_DESCRIPRION);
+            String htmlStr = cursor.getString(DBAdapter.COL_URL);
 
-            if(url!=null) {
-                    myWebView.loadUrl(WEB_URL+url);
-                    Log.e("mahc", "URL: " + WEB_URL+url);
+            htmlsrc ="<p>&nbsp;</p>" +
+                    "<h1>"+titleStr+"</h1>" +
+                    "<p align=\"justify\"> "+decStr+"</p>" +
+                    "<p>"+htmlStr+"</p>";
+
+
+            if(htmlsrc!=null) {
+                    myWebView.loadDataWithBaseURL("", htmlsrc , "text/html", "utf-8", "");
+                Log.e("mahc", "URL: " + WEB_URL+url);
                 }
 
 
