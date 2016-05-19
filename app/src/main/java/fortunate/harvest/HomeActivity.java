@@ -97,8 +97,8 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         listView.setEmptyView(findViewById(R.id.emptyView));
 
         // list view touch actions
-        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        listView.setItemsCanFocus(false);
+        //listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        //listView.setItemsCanFocus(false);
 
         swipeRefreshLayout.setOnRefreshListener(this);
 
@@ -152,6 +152,12 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastURLReceiver, new IntentFilter("ACTION_BROADCAST"));
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        adapter.notifyDataSetChanged();
+    }
+
     private void registerListClickCallback() {
         ListView myList = (ListView) findViewById(R.id.listView);
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -167,21 +173,16 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
     private void ActionOnClick(long id) {
         View v=null;
         int idInOnlineDB = mapping_to_db.get((int) id);
-        Cursor cursor = myDb.getRow(idInOnlineDB);
-        if (cursor.moveToFirst()) {
-            long idDB = cursor.getLong(DBAdapter.COL_ROWID);
-            String url = URL_WEB_VIEW +"?row="+idInOnlineDB;
+        //setting as read
+        messageList.get((int)id).read=1;
 
-            Log.e("HomeActivity", "url : "+ url);
 
-            Intent web_intent = new Intent(getApplicationContext(), WebActivity.class);
-            web_intent.putExtra("url",url);
+        myDb.markAsRead(idInOnlineDB);
 
-            startActivity(web_intent);
+        Intent web_intent = new Intent(getApplicationContext(), WebActivity.class);
+        web_intent.putExtra("dbID",idInOnlineDB);
 
-        }
-        cursor.close();
-
+        startActivity(web_intent);
     }
 
     @Override
@@ -378,7 +379,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                                     }
                                     if(isNew) {
                                         // insert to internal message list
-                                        Message m = new Message(id, title,url,date_rcvd,date_pub,desc);
+                                        Message m = new Message(id, title,url,date_rcvd,date_pub,desc,0);
                                         messageList.add(m);
                                         //create mapping to db here
                                         mapping_to_db.add(id);
@@ -387,7 +388,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                                         // TODO: check whether order of messages will change on the go... as message list is updated from online, on the go
 
                                         //insert in to internal db
-                                        myDb.insertRow(id,title,url,date_rcvd,date_pub,desc);
+                                        myDb.insertRow(id,title,url,date_rcvd,date_pub,desc,0);
                                         Log.e(TAG, "Updated database...");
                                     }
 
@@ -434,7 +435,8 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                         , cursor.getString(DBAdapter.COL_URL)
                         , cursor.getString(DBAdapter.COL_DATE_RCVD)
                         , cursor.getString(DBAdapter.COL_DATE_PUB)
-                        , cursor.getString(DBAdapter.COL_DESCRIPRION));
+                        , cursor.getString(DBAdapter.COL_DESCRIPRION)
+                        , cursor.getInt(DBAdapter.COL_READ));
 
                 messageList.add(m);
                 //create mapping to db here

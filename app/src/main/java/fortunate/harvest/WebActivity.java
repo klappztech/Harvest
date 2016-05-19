@@ -41,8 +41,9 @@ import java.util.Date;
 public class WebActivity extends AppCompatActivity {
 
 
+    private static final String TAG = "mahc" ;
     WebView myWebView;
-    public static final String WEB_URL = "http://harvestentrancecoaching.com/", EXTRA_MODE_INT = "MODE";
+    public static final String WEB_URL = "http://harvestentrancecoaching.com/app/pdf.php?url=", EXTRA_MODE_INT = "MODE";
     private static final String EXTRA_CLOSE = "CLOSE" ;
     ProgressBar progress;
     Button showBM,saveBM;
@@ -56,6 +57,8 @@ public class WebActivity extends AppCompatActivity {
     private Animation twistAnim;
     private BroadcastReceiver broadcastURLReceiver;
     private Toolbar mToolbar;
+    Cursor cursor;
+    String url;
 
 
     @Override
@@ -65,45 +68,41 @@ public class WebActivity extends AppCompatActivity {
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
-//        setSupportActionBar(mToolbar);
- //       getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-//        //fullscreen
-//        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);   //new
-//        getActionBar().setDisplayHomeAsUpEnabled(false);
-//        getActionBar().hide();                                   //new
-//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-
-        isFirstTime=true;
-
-        //my views
-        progress = (ProgressBar) findViewById(R.id.progressBar);
-        progressPercent = (TextView) findViewById(R.id.progressNum);
-        //loadError = (ImageView) findViewById(R.id.imageViewBg);
-        myWebView = (WebView) findViewById(R.id.webview);
-
-
        // cahce mode
+        myWebView = (WebView) findViewById(R.id.webview);
         myWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        myWebView.getSettings().setBuiltInZoomControls(true);
 
-        //load page
+        TextView title = (TextView) findViewById(R.id.txtTitleWeb);
+        TextView desc = (TextView) findViewById(R.id.txtDescWeb);
+
+        //database
+        openDB();
 
         // Getting name, email from intent
         Intent i = getIntent();
 
-        String url = i.getStringExtra("url");
+        int dbID = i.getIntExtra("dbID",0);
 
-        if(url!=null) {
-            myWebView.loadUrl(url);
-            Log.e("mahc", "==========Received broadcast url" + url);
-        }
-        //openWebUrl(WEB_URL+"?m=1");
+        cursor = myDb.getRow(dbID);
+        myDb.markAsRead(dbID);
 
-        // hide loader
-        showProgressBar(false);
-        showError(false);
 
+        if( cursor.getCount() > 0 ) {
+            cursor.moveToFirst();
+                title.setText(cursor.getString(DBAdapter.COL_TITLE));
+                desc.setText(cursor.getString(DBAdapter.COL_DESCRIPRION));
+                url = cursor.getString(DBAdapter.COL_URL);
+
+            if(url!=null) {
+                    myWebView.loadUrl(WEB_URL+url);
+                    Log.e("mahc", "URL: " + WEB_URL+url);
+                }
+
+
+        } else {
+            Log.e(TAG,"Id not found:"+dbID );
+          }
 
     }
 
@@ -130,21 +129,17 @@ public class WebActivity extends AppCompatActivity {
 
     public void showError(boolean status) {
 
-        Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_SHORT);
+        Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT);
     }
 
-    private void showProgressBar(boolean status) {
-        progress = (ProgressBar) findViewById(R.id.progressBar);
-        progressPercent = (TextView) findViewById(R.id.progressNum);
-        if(status) {
-            progress.setVisibility(View.VISIBLE);
-            progressPercent.setVisibility(View.VISIBLE);
-        } else {
-            progress.setVisibility(View.GONE);
-            progressPercent.setVisibility(View.GONE);
-        }
-
+    public void zoomInWebView(View v) {
+        myWebView.zoomIn();
     }
+
+    public void zoomOutWebView(View v) {
+        myWebView.zoomOut();
+    }
+
 
     private void openDB() {
 
@@ -155,6 +150,7 @@ public class WebActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        closeDB();
     }
 
     private void closeDB() {
@@ -212,6 +208,7 @@ public class WebActivity extends AppCompatActivity {
     class MyWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
             Log.e("mahc", "URL: "+ url);
             if (Uri.parse(url).getHost().equals(Uri.parse(WEB_URL).getHost())) {
                 // This is my web site, so do not override; let my WebView load the page
@@ -222,13 +219,13 @@ public class WebActivity extends AppCompatActivity {
                 url="http://railwayslocopilots.blogspot.in/?m=0";
             }
             // Otherwise, the link is not for a page on my site, so launch another Activity that handles URLs
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(intent);
+//            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+//            startActivity(intent);
+//
+//            Log.e("mahc", "open Outside!!");
+//            Toast.makeText(getApplicationContext(), "Opening in Browser...", Toast.LENGTH_SHORT).show();
 
-            Log.e("mahc", "open Outside!!");
-            Toast.makeText(getApplicationContext(), "Opening in Browser...", Toast.LENGTH_SHORT).show();
-
-            return true;
+            return false;//true;
         }
         @Override
         public void onPageFinished(WebView view, String url) {
@@ -238,7 +235,6 @@ public class WebActivity extends AppCompatActivity {
                 myWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
                 isFirstTime =  false;
             }
-            showProgressBar(false);
             if(isError == false) {
                 showError(false);
             }
@@ -247,7 +243,6 @@ public class WebActivity extends AppCompatActivity {
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
-            showProgressBar(true);
             isError = false;
         }
 

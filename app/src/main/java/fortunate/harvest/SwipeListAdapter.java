@@ -3,6 +3,7 @@ package fortunate.harvest;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +59,10 @@ public class SwipeListAdapter extends BaseAdapter {
         title.setText(messageList.get(position).title);
         description.setText(messageList.get(position).description);
         date.setText(String.valueOf(messageList.get(position).date_pub));
+
+        if(messageList.get(position).read == 1) {
+            title.setTypeface(null, Typeface.NORMAL);
+        }
 
 
         String color = bgColors[position % bgColors.length];

@@ -34,6 +34,7 @@ public class DBAdapter {
 	public static final String KEY_DATE_RCVD        = "date_r";
 	public static final String KEY_DATE_PUB         = "date_p";
 	public static final String KEY_DESCRIPRION 		= "description";
+	public static final String KEY_READ		 		= "read";
 
 	// TODO: Setup your field numbers here (0 = KEY_ROWID, 1=...)
 	public static final int COL_ROWID           = 0;
@@ -42,15 +43,16 @@ public class DBAdapter {
 	public static final int COL_DATE_RCVD	    = 3;
 	public static final int COL_DATE_PUB		= 4;
 	public static final int COL_DESCRIPRION     = 5;
+	public static final int COL_READ    		= 6;
 
 	
-	public static final String[] ALL_KEYS = new String[] {KEY_ROWID, KEY_TITLE, KEY_URL, KEY_DATE_RCVD, KEY_DATE_PUB,KEY_DESCRIPRION};
+	public static final String[] ALL_KEYS = new String[] {KEY_ROWID, KEY_TITLE, KEY_URL, KEY_DATE_RCVD, KEY_DATE_PUB,KEY_DESCRIPRION,KEY_READ};
 	
 	// DB info: it's name, and the table we are using (just one).
 	public static final String DATABASE_NAME = "MyDb";
 	public static final String DATABASE_TABLE = "internal_notifications";
 	// Track DB version if a new version of your app changes the format.
-	public static final int DATABASE_VERSION = 6;
+	public static final int DATABASE_VERSION = 7;
 	
 	private static final String DATABASE_CREATE_SQL =
 			"create table " + DATABASE_TABLE 
@@ -70,7 +72,8 @@ public class DBAdapter {
 			+ KEY_URL + " text not null, "
 			+ KEY_DATE_RCVD + " long not null,"
 			+ KEY_DATE_PUB + " long not null,"
-                    + KEY_DESCRIPRION + " text not null"
+                    + KEY_DESCRIPRION + " text not null,"
+					+ KEY_READ + " long not null"
 
 			// Rest  of creation:
 			+ ");";
@@ -102,7 +105,7 @@ public class DBAdapter {
 	}
 	
 	// Add a new set of values to the database.
-	public long insertRow(int id, String title, String url, String date_rcvd, String date_pub, String description) {
+	public long insertRow(int id, String title, String url, String date_rcvd, String date_pub, String description, long read) {
 		/*
 		 * CHANGE 3:
 		 */		
@@ -116,6 +119,7 @@ public class DBAdapter {
 		initialValues.put(KEY_DATE_RCVD, date_rcvd);
 		initialValues.put(KEY_DATE_PUB, date_pub);
 		initialValues.put(KEY_DESCRIPRION, description);
+		initialValues.put(KEY_READ, read);
 
 		// Insert it into the database.
 		return db.insert(DATABASE_TABLE, null, initialValues);
@@ -142,7 +146,7 @@ public class DBAdapter {
 	public Cursor getAllRows() {
 		String where = null;
 		Cursor c = 	db.query(true, DATABASE_TABLE, ALL_KEYS,
-							where, null, null, null, KEY_DATE_PUB +" DESC", null);
+				where, null, null, null, KEY_DATE_PUB + " DESC", null);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -175,6 +179,19 @@ public class DBAdapter {
 		newValues.put(KEY_URL, url);
 		newValues.put(KEY_DATE_PUB, date);
 		
+		// Insert it into the database.
+		return db.update(DATABASE_TABLE, newValues, where, null) != 0;
+	}
+
+	// Change an existing row to be equal to new data.
+	public boolean markAsRead(long rowId) {
+		String where = KEY_ROWID + "=" + rowId;
+
+
+		// Create row's data:
+		ContentValues newValues = new ContentValues();
+		newValues.put(KEY_READ, 1);
+
 		// Insert it into the database.
 		return db.update(DATABASE_TABLE, newValues, where, null) != 0;
 	}

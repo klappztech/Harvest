@@ -1,36 +1,90 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    xmlns:ads="http://schemas.android.com/apk/res-auto"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:padding="0dp"
-    tools:context=".MainActivity"
-    android:background="#ffffff">
+    android:background="#ffffff"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    >
 
 
-    <WebView  xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/webview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="70dp"
+        android:id="@+id/imageView2"
+        android:src="@drawable/logo_title"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_gravity="center"
+        android:layout_margin="15dp" />
 
-
-
-    <ProgressBar
-        style="?android:attr/progressBarStyleLarge"
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/progressBar"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:id="@+id/imageView3"
+        android:src="@drawable/line"
+        android:layout_gravity="center_horizontal" />
 
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="This is a title and it will be large"
+        android:id="@+id/txtTitleWeb"
+        android:layout_marginTop="30dp"
+        android:typeface="sans"
+        android:textSize="28dp"
+        android:layout_below="@+id/imageView2"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="25dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="100%"
-        android:id="@+id/progressNum"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="In the XML layout file I was able to get the TextViews elments themeslves to align to the right by adding the following attribute inside all of my TextViews doing thi"
+        android:id="@+id/txtDescWeb"
+        android:layout_below="@+id/txtTitleWeb"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="25dp" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+"
+        android:id="@+id/btnZoomIn"
+        android:layout_gravity="right"
+        android:onClick="zoomInWebView" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-"
+        android:id="@+id/btnZoomOut"
+        android:layout_gravity="right"
+        android:onClick="zoomOutWebView" />
+
+    <WebView  xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/webview"
+        android:layout_width="fill_parent"
+        android:layout_height="500dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/txtDescWeb"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 
-</RelativeLayout>
+</LinearLayout>
+</ScrollView>
