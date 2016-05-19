@@ -360,12 +360,12 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                                     Date timeInMillis = new Date();
 
                                     Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                    String date_rcvd = formatter.format(timeInMillis);
+                                    long date_rcvd = timeInMillis.getTime(); //formatter.format(timeInMillis);
 
                                     int id          = messageObj.getInt("id");
                                     String title    = messageObj.getString("title");
                                     String url      = messageObj.getString("url");
-                                    String date_pub      = messageObj.getString("date");
+                                    long date_pub      = messageObj.getLong("date");
                                     String desc     = messageObj.getString("description");
 
 
@@ -433,8 +433,8 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                 Message m = new Message(cursor.getInt(DBAdapter.COL_ROWID)
                         , cursor.getString(DBAdapter.COL_TITLE)
                         , cursor.getString(DBAdapter.COL_URL)
-                        , cursor.getString(DBAdapter.COL_DATE_RCVD)
-                        , cursor.getString(DBAdapter.COL_DATE_PUB)
+                        , cursor.getLong(DBAdapter.COL_DATE_RCVD)
+                        , cursor.getLong(DBAdapter.COL_DATE_PUB)
                         , cursor.getString(DBAdapter.COL_DESCRIPRION)
                         , cursor.getInt(DBAdapter.COL_READ));
 

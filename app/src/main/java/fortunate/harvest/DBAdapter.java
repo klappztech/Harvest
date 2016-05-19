@@ -52,7 +52,7 @@ public class DBAdapter {
 	public static final String DATABASE_NAME = "MyDb";
 	public static final String DATABASE_TABLE = "internal_notifications";
 	// Track DB version if a new version of your app changes the format.
-	public static final int DATABASE_VERSION = 7;
+	public static final int DATABASE_VERSION = 8;
 	
 	private static final String DATABASE_CREATE_SQL =
 			"create table " + DATABASE_TABLE 
@@ -105,7 +105,7 @@ public class DBAdapter {
 	}
 	
 	// Add a new set of values to the database.
-	public long insertRow(int id, String title, String url, String date_rcvd, String date_pub, String description, long read) {
+	public long insertRow(int id, String title, String url, long date_rcvd, long date_pub, String description, long read) {
 		/*
 		 * CHANGE 3:
 		 */		
