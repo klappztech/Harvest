@@ -144,7 +144,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                 if(action == "reload") {
                     Log.e("mahc", "Broadcast_received: reload");
-                    //populateListViewFromDB();
+                    fetchMessagesFromOnlineDB();
                 }
 
             }
@@ -180,7 +180,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         myDb.markAsRead(idInOnlineDB);
 
         Intent web_intent = new Intent(getApplicationContext(), WebActivity.class);
-        web_intent.putExtra("dbID",idInOnlineDB);
+        web_intent.putExtra("dbID", idInOnlineDB);
 
         startActivity(web_intent);
     }
@@ -200,58 +200,6 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         myDb = new DBAdapter(this);
         myDb.open();
         Log.e("mahc", "HOMEActivity::Database: open");
-    }
-
-
-    public String getTimeAgo(long time, Context ctx) {
-
-        final int SECOND_MILLIS = 1000;
-        final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
-        final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
-        final long DAY_MILLIS = 24 * HOUR_MILLIS;
-        final long MONTH_MILLIS = 30 * DAY_MILLIS;
-        long diff=0;
-
-        if (time < 1000000000000L) {
-            // if timestamp given in seconds, convert to millis
-            time *= 1000;
-        }
-
-        long now = System.currentTimeMillis();
-        if (time > now || time <= 0) {
-            return null;
-        }
-
-        // TODO: localize
-        if (isToday(time)) {
-            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
-            Date resultdate = new Date(time);
-            return sdf.format(resultdate).toString();
-        } else {
-            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a, dd/MM/yyyy");
-            Date resultdate = new Date(time);
-            return sdf.format(resultdate).toString();
-        }
-
-    }
-
-    private boolean isToday(long time) {
-
-        final int SECOND_MILLIS = 1000;
-        final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
-        final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
-        final long DAY_MILLIS = 24 * HOUR_MILLIS;
-        final long MONTH_MILLIS = 30 * DAY_MILLIS;
-
-        Date resultdate = new Date(time);
-        long now = System.currentTimeMillis();
-
-        if( Math.floor(now/DAY_MILLIS) == Math.floor(time/DAY_MILLIS)  ) {
-            return true;
-        } else {
-            return false;
-        }
-
     }
 
     @Override
@@ -323,6 +271,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         if(cd.isConnectingToInternet()) {
             fetchMessagesFromOnlineDB();
+            adapter.notifyDataSetChanged();
         } else {
             Toast.makeText(getApplicationContext(), "Not connected to Internet!",Toast.LENGTH_SHORT);
             swipeRefreshLayout.setRefreshing(false);
@@ -380,9 +329,9 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                                     if(isNew) {
                                         // insert to internal message list
                                         Message m = new Message(id, title,url,date_rcvd,date_pub,desc,0);
-                                        messageList.add(m);
+                                        messageList.add(0,m);
                                         //create mapping to db here
-                                        mapping_to_db.add(id);
+                                        mapping_to_db.add(0,id);
 
 
                                         // TODO: check whether order of messages will change on the go... as message list is updated from online, on the go
@@ -438,9 +387,9 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                         , cursor.getString(DBAdapter.COL_DESCRIPRION)
                         , cursor.getInt(DBAdapter.COL_READ));
 
-                messageList.add(m);
+                messageList.add(0,m);
                 //create mapping to db here
-                mapping_to_db.add(cursor.getInt(DBAdapter.COL_ROWID));
+                mapping_to_db.add(0,cursor.getInt(DBAdapter.COL_ROWID));
             }
             Log.e(TAG,"Updated MessageList from DB: count = "+cursor.getCount());
             return cursor.getCount();

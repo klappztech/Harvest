@@ -74,6 +74,16 @@ public class WebActivity extends AppCompatActivity {
         myWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         myWebView.getSettings().setBuiltInZoomControls(true);
 
+        // to disable long click(selection) in webview
+        myWebView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return true;
+            }
+        });
+        myWebView.setLongClickable(false);
+        myWebView.setHapticFeedbackEnabled(false);
+
 
 
 

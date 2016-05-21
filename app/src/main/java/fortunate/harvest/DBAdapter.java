@@ -146,7 +146,7 @@ public class DBAdapter {
 	public Cursor getAllRows() {
 		String where = null;
 		Cursor c = 	db.query(true, DATABASE_TABLE, ALL_KEYS,
-				where, null, null, null, KEY_DATE_PUB + " DESC", null);
+				where, null, null, null, KEY_DATE_PUB + " ASC", null);
 		if (c != null) {
 			c.moveToFirst();
 		}

@@ -6,8 +6,11 @@ package fortunate.harvest;
 import static fortunate.harvest.CommonUtilities.SENDER_ID;
 import static fortunate.harvest.CommonUtilities.SERVER_URL;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -35,6 +38,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     // Internet detector
     ConnectionDetector cd;
+    boolean isConnectedToInternet = false;
 
     // UI elements
     EditText txtName;
@@ -47,12 +51,12 @@ public class RegisterActivity extends AppCompatActivity {
     // User Session Manager Class
     UserSessionManager session;
 
+    ProgressDialog pd;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-
-
 
         // for toolbar
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -63,6 +67,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         cd = new ConnectionDetector(getApplicationContext());
 
+        pd = new ProgressDialog(RegisterActivity.this);       pd.setMessage("loading");
+        pd.setCancelable(false);
+
         // User Session Manager
         session = new UserSessionManager(getApplicationContext());
         if(session.isUserLoggedIn()) {
@@ -70,15 +77,11 @@ public class RegisterActivity extends AppCompatActivity {
             Intent intentHome = new Intent(getApplicationContext(), HomeActivity.class);
             startActivity(intentHome);
             finish();
-        } else if (!cd.isConnectingToInternet()) {
-            // Internet Connection is not present
-            alert.showAlertDialog(RegisterActivity.this,
-                    "Internet Connection Error",
-                    "Please connect to working Internet connection", false);
-            // stop executing code by return
-            return;
         } else {
-            //Connection is there, be in Register activity
+
+            if(!cd.isConnectingToInternet()) {
+                checkInternetAndLaunchDialog();
+            }
         }
 
         // Check if GCM configuration is set
@@ -115,7 +118,14 @@ public class RegisterActivity extends AppCompatActivity {
                 // Check if user filled the form
                 if(name.trim().length() > 0 && email.trim().length() > 0){
                     // // TODO: 5/4/2016 remove this portion
-                    IsRegisteredOnline(name, email);
+                    if(cd.isConnectingToInternet()) { // TODO: 5/8/2016 net cnected )
+                        IsRegisteredOnline(name, email);
+                    } else {
+                        if(!cd.isConnectingToInternet()) {
+                            checkInternetAndLaunchDialog();
+                        }
+                    }
+
 
                 }else{
                     // user doen't filled that data
@@ -126,9 +136,28 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    private void checkInternetAndLaunchDialog() {
+
+        alert.showAlertDialog(RegisterActivity.this, "Connection Failed!", "Please Check Your Internet Connection", false);
+
+//        AlertDialog dialog = new AlertDialog.Builder(this)
+//                .setTitle("Connection Failed")
+//                .setMessage("Please Check Your Internet Connection")
+//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                        //Code for try again
+//                        // nothing to do, dialog will close
+//                    }
+//                }).create();
+//        dialog.show();
+    }
+
     private void IsRegisteredOnline(String username, String password) {
         // appending offset to url
         String url = URL_REG_CHECK+"?username="+username+"&password="+password;
+
+        pd.show();
 
         // Volley's json array request object
         JsonArrayRequest req = new JsonArrayRequest(url,
@@ -138,6 +167,9 @@ public class RegisterActivity extends AppCompatActivity {
                         String username;
                         String password;
                         Log.d("IsRegisteredOnline", response.toString());
+
+                        pd.hide();
+
 
                         username = txtName.getText().toString();
                         password = txtEmail.getText().toString();
@@ -172,8 +204,10 @@ public class RegisterActivity extends AppCompatActivity {
 
 
                                     } else {
-                                        Toast.makeText(getApplicationContext(), "Your password is incorrect!", Toast.LENGTH_LONG).show();
-                                    }
+                                       // Toast.makeText(getApplicationContext(), "Your password is incorrect!", Toast.LENGTH_LONG).show();
+                                       alert.showAlertDialog(RegisterActivity.this, "Login Error!",
+                                               "Your password is incorrect!", false);
+                                   }
 
 
 

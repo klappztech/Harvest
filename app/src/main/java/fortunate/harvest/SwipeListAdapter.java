@@ -64,17 +64,11 @@ public class SwipeListAdapter extends BaseAdapter {
 
         long time_pub = messageList.get(position).date_pub;
 
-        //Date timeInMillis = new Date();
-        //timeInMillis.setTime(time_pub*1000); // to millisec
-
-        //Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        //String TimeStr = formatter.format(timeInMillis);
-
-
         date.setText(getTimeAgo(time_pub*1000));
 
         if(messageList.get(position).read == 1) {
             title.setTypeface(null, Typeface.NORMAL);
+            title.setTextColor(activity.getApplicationContext().getResources().getColor(R.color.light_blue) );
         }
 
 
@@ -109,8 +103,10 @@ public class SwipeListAdapter extends BaseAdapter {
             SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
             Date resultdate = new Date(time);
             return sdf.format(resultdate).toString();
+        } else if (isYesterday(time)) {
+            return "Yesterday";
         } else {
-            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a, dd/MM/yyyy");
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             Date resultdate = new Date(time);
             return sdf.format(resultdate).toString();
         }
@@ -125,7 +121,6 @@ public class SwipeListAdapter extends BaseAdapter {
         final long DAY_MILLIS = 24 * HOUR_MILLIS;
         final long MONTH_MILLIS = 30 * DAY_MILLIS;
 
-        Date resultdate = new Date(time);
         long now = System.currentTimeMillis();
 
         if( Math.floor(now/DAY_MILLIS) == Math.floor(time/DAY_MILLIS)  ) {
@@ -134,6 +129,24 @@ public class SwipeListAdapter extends BaseAdapter {
             return false;
         }
 
+    }
+
+    private boolean isYesterday(long time) {
+
+        final int SECOND_MILLIS = 1000;
+        final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
+        final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
+        final long DAY_MILLIS = 24 * HOUR_MILLIS;
+        final long MONTH_MILLIS = 30 * DAY_MILLIS;
+
+        long now = System.currentTimeMillis();
+
+        if( Math.floor(now/DAY_MILLIS) == (Math.floor(time/DAY_MILLIS)+1)  ) {
+            //its yesterday
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }
