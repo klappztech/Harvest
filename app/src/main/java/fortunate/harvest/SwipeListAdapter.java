@@ -58,17 +58,19 @@ public class SwipeListAdapter extends BaseAdapter {
         TextView description = (TextView) convertView.findViewById(R.id.item_description);
         TextView date = (TextView) convertView.findViewById(R.id.item_date);
         TextView icon = (TextView) convertView.findViewById(R.id.serial);
+        TextView new_star = (TextView) convertView.findViewById(R.id.item_new);
 
         title.setText(messageList.get(position).title);
         description.setText(messageList.get(position).description);
-
         long time_pub = messageList.get(position).date_pub;
-
         date.setText(getTimeAgo(time_pub*1000));
 
         if(messageList.get(position).read == 1) {
-            title.setTypeface(null, Typeface.NORMAL);
-            title.setTextColor(activity.getApplicationContext().getResources().getColor(R.color.light_blue) );
+            //title.setTypeface(null, Typeface.NORMAL);
+            //title.setTextColor(activity.getApplicationContext().getResources().getColor(R.color.light_blue) );
+            new_star.setText("");
+        } else {
+            new_star.setText("✪");
         }
 
 
@@ -86,6 +88,7 @@ public class SwipeListAdapter extends BaseAdapter {
         final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
         final long DAY_MILLIS = 24 * HOUR_MILLIS;
         final long MONTH_MILLIS = 30 * DAY_MILLIS;
+
         long diff=0;
 
         if (time < 1000000000000L) {
@@ -98,7 +101,7 @@ public class SwipeListAdapter extends BaseAdapter {
             return null;
         }
 
-        // TODO: localize
+
         if (isToday(time)) {
             SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
             Date resultdate = new Date(time);
@@ -113,6 +116,8 @@ public class SwipeListAdapter extends BaseAdapter {
 
     }
 
+
+
     private boolean isToday(long time) {
 
         final int SECOND_MILLIS = 1000;
@@ -120,8 +125,10 @@ public class SwipeListAdapter extends BaseAdapter {
         final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
         final long DAY_MILLIS = 24 * HOUR_MILLIS;
         final long MONTH_MILLIS = 30 * DAY_MILLIS;
+        final long IST_CONV_FACTOR = (long) (5.5*HOUR_MILLIS);
 
-        long now = System.currentTimeMillis();
+        long now = System.currentTimeMillis() - IST_CONV_FACTOR;
+        time = time - IST_CONV_FACTOR;
 
         if( Math.floor(now/DAY_MILLIS) == Math.floor(time/DAY_MILLIS)  ) {
             return true;
@@ -138,8 +145,10 @@ public class SwipeListAdapter extends BaseAdapter {
         final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
         final long DAY_MILLIS = 24 * HOUR_MILLIS;
         final long MONTH_MILLIS = 30 * DAY_MILLIS;
+        final long IST_CONV_FACTOR = (long) (5.5*HOUR_MILLIS);
 
-        long now = System.currentTimeMillis();
+        long now = System.currentTimeMillis() - IST_CONV_FACTOR;
+        time = time - IST_CONV_FACTOR;
 
         if( Math.floor(now/DAY_MILLIS) == (Math.floor(time/DAY_MILLIS)+1)  ) {
             //its yesterday

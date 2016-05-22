@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#116a70</color>
-    <color name="colorPrimaryDark">#0a3f43</color>
+    <color name="colorPrimary">#075E54</color>
+    <color name="colorPrimaryDark">#054D44</color>
     <color name="textColorPrimary">#FFFFFF</color>
     <color name="windowBackground">#FFFFFF</color>
     <color name="navigationBarColor">#000000</color>
     <color name="colorAccent">#c8e8ff</color>
     <color name="light_blue">#c8e8ff</color>
+    <color name="bright_yellow">#FFBB00</color>
 
     <color name="list_title">#000000</color>
     <color name="list_desc">#888888</color>
 
 
     <string-array name="movie_serial_bg">
-        <item>#354458</item>
-        <item>#3A9AD9</item>
-        <item>#29ABA4</item>
-        <item>#E9E0D6</item>
-        <item>#EB7260</item>
-        <item>#92B06A</item>
+        <item>#51B8A3</item>
+        <item>#5ABD53</item>
+        <item>#1867FA</item>
+        <item>#C63926</item>
+        <item>#F17A30</item>
+        <item>#9754FC</item>
     </string-array>
 
 </resources>

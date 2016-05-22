@@ -130,10 +130,21 @@ public class RegisterActivity extends AppCompatActivity {
                 }else{
                     // user doen't filled that data
                     // ask him to fill the form
-                    alert.showAlertDialog(RegisterActivity.this, "Registration Error!", "Please enter your details", false);
+                    alert.showAlertDialog(RegisterActivity.this, "Registration Error!", "Please enter username and password!", false);
                 }
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (pd != null) {
+            pd.dismiss();
+            pd = null;
+        }
+
     }
 
     private void checkInternetAndLaunchDialog() {

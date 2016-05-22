@@ -28,7 +28,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 
     private static final String TAG = "GCMIntentService";
 
-    UserSessionManager session;
+    static UserSessionManager session;
+    public static boolean isPendingIntent=false;
 
     public GCMIntentService() {
         super(SENDER_ID);
@@ -66,12 +67,19 @@ public class GCMIntentService extends GCMBaseIntentService {
      * */
     @Override
     protected void onMessage(Context context, Intent intent) {
-        Log.i(TAG, "Received message");
         String message = intent.getExtras().getString("price");
+        String dbID_str = intent.getExtras().getString("id");
+        long dbID = Integer.valueOf(dbID_str);
+        Log.e(TAG, "Received message" + message + "id: " + dbID);
 
         //displayMessage(context, message);
-        // notifies user
-        generateNotification(context, message);
+
+        // User Session Manager
+        session = new UserSessionManager(getApplicationContext());
+        if(session.isUserLoggedIn()) {
+            // notifies user
+            generateNotification(context, message,dbID);
+        }
     }
 
     /**
@@ -83,7 +91,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         String message = getString(R.string.gcm_deleted, total);
         //displayMessage(context, message);
         // notifies user
-        generateNotification(context, message);
+        generateNotification(context, message,0);
     }
 
     /**
@@ -106,10 +114,13 @@ public class GCMIntentService extends GCMBaseIntentService {
     /**
      * Issues a notification to inform the user that server has sent a message.
      */
-    private static void generateNotification(Context context, String message) {
+    private static void generateNotification(Context context, String message,long dbID) {
         int icon = R.drawable.ic_launcher;
         int mId=0;
         long when = System.currentTimeMillis();
+
+        session = new UserSessionManager(context);
+
         context.getSystemService(Context.NOTIFICATION_SERVICE);
         //Notification notification = new Notification(icon, message, when);
 
@@ -125,41 +136,94 @@ public class GCMIntentService extends GCMBaseIntentService {
         openDB(context);
         //long newId = myDb.insertRow("Result", message, timeInMillis.getTime()/1000,);
 
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle("New message from Harvest")
-                        .setContentText(message);
 
-        // clear notification on click
-        mBuilder.setAutoCancel(true);
+
+
+        if(isPendingIntent == false){
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(context)
+                            .setSmallIcon(R.drawable.ic_launcher)
+                            .setContentTitle("Harvest")
+                            .setContentText(message)
+                            .setDefaults(NotificationCompat.DEFAULT_SOUND | NotificationCompat.DEFAULT_VIBRATE | NotificationCompat.DEFAULT_LIGHTS);;
+
+            // clear notification on click
+            mBuilder.setAutoCancel(true);
 // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(context, RegisterActivity.class);
+            Intent resultIntent = new Intent(context, WebActivity.class);
+            resultIntent.putExtra("id",dbID);
 
 // The stack builder object will contain an artificial back stack for the
 // started Activity.
 // This ensures that navigating backward from the Activity leads out of
 // your application to the Home screen.
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
 // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(RegisterActivity.class);
+            stackBuilder.addParentStack(HomeActivity.class);
 // Adds the Intent that starts the Activity to the top of the stack
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        mBuilder.setContentIntent(resultPendingIntent);
-        NotificationManager mNotificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-// mId allows you to update the notification later on.
-        mNotificationManager.notify(mId, mBuilder.build());
+            stackBuilder.addNextIntent(resultIntent);
+            PendingIntent resultPendingIntent =
+                    stackBuilder.getPendingIntent(
+                            0,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+            mBuilder.setContentIntent(resultPendingIntent);
+            NotificationManager mNotificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            // mId allows you to update the notification later on.
+            mNotificationManager.notify(mId, mBuilder.build());
+
+            //set that notification is pending to be read
+            session.setPendingNotification();
+            isPendingIntent = true;
+        } else {
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(context)
+                            .setSmallIcon(R.drawable.ic_launcher)
+                            .setContentTitle("Harvest")
+                            .setContentText("You've received new messages!")
+                            .setDefaults(NotificationCompat.DEFAULT_SOUND | NotificationCompat.DEFAULT_VIBRATE | NotificationCompat.DEFAULT_LIGHTS);;
+
+            // clear notification on click
+            mBuilder.setAutoCancel(true);
+// Creates an explicit intent for an Activity in your app
+            Intent resultIntent = new Intent(context, HomeActivity.class);
+            resultIntent.putExtra("id",dbID);
+
+// The stack builder object will contain an artificial back stack for the
+// started Activity.
+// This ensures that navigating backward from the Activity leads out of
+// your application to the Home screen.
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+// Adds the back stack for the Intent (but not the Intent itself)
+            stackBuilder.addParentStack(HomeActivity.class);
+// Adds the Intent that starts the Activity to the top of the stack
+            stackBuilder.addNextIntent(resultIntent);
+            PendingIntent resultPendingIntent =
+                    stackBuilder.getPendingIntent(
+                            0,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+            mBuilder.setContentIntent(resultPendingIntent);
+            NotificationManager mNotificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            // mId allows you to update the notification later on.
+            mNotificationManager.notify(mId, mBuilder.build());
+
+            //set that notification is pending to be read
+            session.setPendingNotification();
+        }
 
         // update the list view in the home activity
         sendBroadcastMessage( context );
 
 
+    }
+    public void clearNotification() {
+        NotificationManager mNotificationManager =
+                (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+        mNotificationManager.cancelAll();
     }
 
     private static void sendBroadcastMessage(Context context) {

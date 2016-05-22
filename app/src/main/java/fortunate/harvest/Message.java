@@ -20,10 +20,10 @@ public class Message {
     public Message(int id, String title, String url,long date_rcvd, long date_pub,  String description, int read) {
         this.id = id;
         this.title = title;
-        this.url = url;
+        this.url ="";// url;
         this.date_rcvd = date_rcvd;
         this.date_pub = date_pub;
-        this.description = description;
+        this.description = description.substring(0,Math.min(description.length(),60));
         this.read = read;
     }
 

@@ -1,5 +1,6 @@
 package fortunate.harvest;
 
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.google.android.gcm.GCMBaseIntentService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,6 +89,14 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         // for list view click action
         registerListClickCallback();
 
+        //clear all notifications as you will see them now
+        String ns = Context.NOTIFICATION_SERVICE;
+        NotificationManager nMgr = (NotificationManager) getApplicationContext().getSystemService(ns);
+        nMgr.cancelAll();
+        session.clearPendingNotification();
+        GCMIntentService.isPendingIntent = false;
+
+
 
         listView = (ListView) findViewById(R.id.listView);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
@@ -142,6 +152,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                 String action = intent.getStringExtra("ACTION");
                 openDB();
 
+
                 if(action == "reload") {
                     Log.e("mahc", "Broadcast_received: reload");
                     fetchMessagesFromOnlineDB();
@@ -172,7 +183,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void ActionOnClick(long id) {
         View v=null;
-        int idInOnlineDB = mapping_to_db.get((int) id);
+        long idInOnlineDB = mapping_to_db.get((int) id);
         //setting as read
         messageList.get((int)id).read=1;
 
@@ -180,7 +191,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
         myDb.markAsRead(idInOnlineDB);
 
         Intent web_intent = new Intent(getApplicationContext(), WebActivity.class);
-        web_intent.putExtra("dbID", idInOnlineDB);
+        web_intent.putExtra("id", idInOnlineDB);
 
         startActivity(web_intent);
     }
@@ -276,6 +287,13 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
             Toast.makeText(getApplicationContext(), "Not connected to Internet!",Toast.LENGTH_SHORT);
             swipeRefreshLayout.setRefreshing(false);
         }
+        //clear all notifications as you will see them now
+        String ns = Context.NOTIFICATION_SERVICE;
+        NotificationManager nMgr = (NotificationManager) getApplicationContext().getSystemService(ns);
+        nMgr.cancelAll();
+        session.clearPendingNotification();
+        GCMIntentService.isPendingIntent = false;
+
     }
     /**
      * Fetching movies json by making http call
@@ -314,7 +332,7 @@ public class HomeActivity extends AppCompatActivity implements SwipeRefreshLayou
                                     int id          = messageObj.getInt("id");
                                     String title    = messageObj.getString("title");
                                     String url      = messageObj.getString("url");
-                                    long date_pub      = messageObj.getLong("date");
+                                    long date_pub   = messageObj.getLong("date");
                                     String desc     = messageObj.getString("description");
 
 

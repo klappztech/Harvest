@@ -1,6 +1,7 @@
 package fortunate.harvest;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -53,6 +54,9 @@ public class WebActivity extends AppCompatActivity {
     TextView progressPercent,txtMode;
     int globalMode=0;//  0:offline, 1:online
 
+    // User Session Manager Class
+    UserSessionManager session;
+
     DBAdapter myDb ;
     private Animation twistAnim;
     private BroadcastReceiver broadcastURLReceiver;
@@ -69,6 +73,16 @@ public class WebActivity extends AppCompatActivity {
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
+        // User Session Manager
+        session = new UserSessionManager(this);
+
+        //clear all notifications as you will see them now
+        String ns = Context.NOTIFICATION_SERVICE;
+        NotificationManager nMgr = (NotificationManager) getApplicationContext().getSystemService(ns);
+        nMgr.cancelAll();
+        session.clearPendingNotification();
+        GCMIntentService.isPendingIntent = false;
+
        // cahce mode
         myWebView = (WebView) findViewById(R.id.webview);
         myWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
@@ -84,16 +98,13 @@ public class WebActivity extends AppCompatActivity {
         myWebView.setLongClickable(false);
         myWebView.setHapticFeedbackEnabled(false);
 
-
-
-
         //database
         openDB();
 
         // Getting name, email from intent
         Intent i = getIntent();
 
-        int dbID = i.getIntExtra("dbID",0);
+        long dbID = i.getLongExtra("id", 0);
 
         cursor = myDb.getRow(dbID);
         myDb.markAsRead(dbID);
@@ -105,6 +116,8 @@ public class WebActivity extends AppCompatActivity {
             String decStr = cursor.getString(DBAdapter.COL_DESCRIPRION);
             String htmlStr = cursor.getString(DBAdapter.COL_URL);
 
+            //Log.e("WebActivity", "HTML : "+htmlStr);
+
             htmlsrc ="<p>&nbsp;</p>" +
                     "<h1>"+titleStr+"</h1>" +
                     "<p align=\"justify\"> "+decStr+"</p>" +
@@ -112,8 +125,7 @@ public class WebActivity extends AppCompatActivity {
 
 
             if(htmlsrc!=null) {
-                    myWebView.loadDataWithBaseURL("", htmlsrc , "text/html", "utf-8", "");
-                Log.e("mahc", "URL: " + WEB_URL+url);
+                    myWebView.loadDataWithBaseURL("", htmlsrc, "text/html", "utf-8", "");
                 }
 
 

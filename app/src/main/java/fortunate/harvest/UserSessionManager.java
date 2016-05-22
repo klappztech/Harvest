@@ -43,6 +43,9 @@ public class UserSessionManager {
     // course
     public static final String KEY_COURSE = "gcm_course";
 
+    // course
+    public static final String KEY_PENDING_NOTIFICATION = "pending_notification";
+
     // Constructor
     public UserSessionManager(Context context){
         this._context = context;
@@ -70,6 +73,9 @@ public class UserSessionManager {
         // Storing course
         editor.putInt(KEY_COURSE, course);
 
+        // Storing login value as TRUE
+        editor.putBoolean(KEY_PENDING_NOTIFICATION, false);
+
         // commit changes
         editor.commit();
 
@@ -96,6 +102,22 @@ public class UserSessionManager {
         return pref.getInt(KEY_COURSE, 9999);
     }
 
+    public void setPendingNotification() {
+
+        // Storing pending Notification value as TRUE
+        editor.putBoolean(KEY_PENDING_NOTIFICATION, true);
+        editor.commit();
+    }
+
+    public void clearPendingNotification() {
+        // Storing pending Notification value as TRUE
+        editor.putBoolean(KEY_PENDING_NOTIFICATION, false);
+        editor.commit();
+    }
+
+    public boolean isPendingNotification() {
+        return pref.getBoolean(KEY_PENDING_NOTIFICATION, false);
+    }
     /**
      * Check login method will check user login status
      * If false it will redirect user to login page

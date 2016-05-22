@@ -10,14 +10,13 @@
         android:layout_height="50dp"
         android:gravity="center"
         android:padding="10dp"
-        android:layout_alignParentLeft="true"
         android:textSize="20dp"
         android:textStyle="bold"
-        android:text="A"
+        android:text="M"
         android:background="@color/light_blue"
-        android:layout_marginLeft="1dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginBottom="1dp" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:id="@+id/item_description"
@@ -25,13 +24,16 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="The description will be displayed here"
-        android:layout_below="@+id/item_title"
         android:paddingBottom="5dp"
         android:textColor="@color/list_desc"
         android:singleLine="true"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/serial"
-        android:layout_marginLeft="10dp" />
+        android:textSize="14dp"
+        android:gravity="bottom"
+        android:layout_alignBottom="@+id/serial"
+        android:layout_alignLeft="@+id/item_title"
+        android:layout_alignStart="@+id/item_title"
+        android:layout_toLeftOf="@+id/item_new"
+        android:layout_toStartOf="@+id/item_new" />
 
 
 
@@ -42,25 +44,41 @@
         android:text="12/12/2016"
 
         android:singleLine="true"
+        android:textColor="@color/list_desc"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:textColor="@color/list_desc"/>
+        android:textSize="12dp" />
 
     <TextView
         android:id="@+id/item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="This Is A Title"
         android:singleLine="true"
         android:textColor="@color/list_title"
-        android:textStyle="bold"
-        android:layout_alignTop="@+id/serial"
-        android:layout_alignLeft="@+id/item_description"
-        android:layout_alignStart="@+id/item_description"
+        android:textSize="18dp"
+        android:typeface="sans"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/serial"
+        android:layout_marginLeft="10dp"
         android:layout_toLeftOf="@+id/item_date"
-        android:layout_toStartOf="@+id/item_date" />
+        android:layout_toStartOf="@+id/item_date"
+        android:layout_marginRight="10dp" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="✪"
+        android:id="@+id/item_new"
+        android:textColor="@color/bright_yellow"
+        android:gravity="center|center_vertical|center_horizontal"
+        android:textSize="26dp"
+        android:layout_alignBottom="@+id/item_description"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginLeft="15dp" />
 
 
 </RelativeLayout>
